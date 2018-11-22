@@ -6,6 +6,8 @@ import { isNil } from 'lodash';
 
 import * as React from 'react';
 
+import * as simplegit from 'simple-git/promise';
+
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
 
@@ -19,6 +21,11 @@ export default class App extends React.Component<any, object> {
   }
 
   handleBrowse = () => {
+
+    const git = simplegit();
+    git.status().then((status: any) => {
+      console.log(status);
+    });
 
     const dialog: any = remote.dialog;
     dialog.showOpenDialog({
