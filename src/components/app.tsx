@@ -15,13 +15,6 @@ import {List, ListItem} from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 import Checkbox from 'material-ui/Checkbox';
 
-const styles = {
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-};
-
 export default class App extends React.Component<any, object> {
 
   state: any;
@@ -67,6 +60,11 @@ export default class App extends React.Component<any, object> {
     });
   }
 
+  updateCheck(event: any, isInputChecked: boolean) {
+    console.log('update check invoked');
+    console.log(event);
+  }
+
   render() {
 
     const self = this;
@@ -90,21 +88,33 @@ export default class App extends React.Component<any, object> {
 
 
             <List>
-              <Subheader>Hangout Notifications</Subheader>
+              <Subheader>Local Branches</Subheader>
               <ListItem
-                leftCheckbox={<Checkbox />}
+                leftCheckbox={
+                  <Checkbox
+                  id={'branch0'}
+                  onCheck={this.updateCheck.bind(this)}
+                  />
+                }
                 primaryText="Notifications"
-                secondaryText="Allow notifications"
               />
               <ListItem
-                leftCheckbox={<Checkbox />}
+                leftCheckbox={
+                  <Checkbox
+                  id={'branch1'}
+                  onCheck={this.updateCheck.bind(this)}
+                  />
+                }
                 primaryText="Sounds"
-                secondaryText="Hangouts message"
               />
               <ListItem
-                leftCheckbox={<Checkbox />}
+                leftCheckbox={
+                  <Checkbox
+                  id={'branch2'}
+                  onCheck={this.updateCheck.bind(this)}
+                  />
+                }
                 primaryText="Video sounds"
-                secondaryText="Hangouts video call"
               />
             </List>            
           </div>
