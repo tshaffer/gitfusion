@@ -120,46 +120,55 @@ export default class App extends React.Component<any, object> {
 
 
             <List>
-              <Subheader>Local Branches</Subheader>
               <ListItem
-                leftCheckbox={
-                  <Checkbox
-                  id={'0'}
-                  checked={self.state.localBranchesDisplay[0]}
-                  onCheck={this.updateCheck}
-                  style={styles.checkbox}
+                primaryText="Local Branches"
+                initiallyOpen={true}
+                primaryTogglesNestedList={true}
+                nestedItems={[
+                  <ListItem
+                    key={0}
+                    leftCheckbox={
+                      <Checkbox
+                      id={'0'}
+                      checked={self.state.localBranchesDisplay[0]}
+                      onCheck={this.updateCheck}
+                      style={styles.checkbox}
 
-                  />
-                }
-                primaryText="Notifications"
-                style={styles.listItem}
-              />
-              <ListItem
-                leftCheckbox={
-                  <Checkbox
-                  id={'1'}
-                  checked={self.state.localBranchesDisplay[1]}
-                  onCheck={this.updateCheck}
-                  style={styles.checkbox}
+                      />
+                    }
+                    primaryText="Notifications"
+                    style={styles.listItem}
+                  />,
+                  <ListItem
+                  key={1}
+                  leftCheckbox={
+                      <Checkbox
+                      id={'1'}
+                      checked={self.state.localBranchesDisplay[1]}
+                      onCheck={this.updateCheck}
+                      style={styles.checkbox}
 
-                  />
-                }
-                primaryText="Sounds"
-                style={styles.listItem}
-              />
-              <ListItem
-                leftCheckbox={
-                  <Checkbox
-                  id={'2'}
-                  checked={self.state.localBranchesDisplay[2]}
-                  onCheck={this.updateCheck}
-                  style={styles.checkbox}
+                      />
+                    }
+                    primaryText="Sounds"
+                    style={styles.listItem}
+                  />,
+                  <ListItem
+                  key={2}
+                  leftCheckbox={
+                      <Checkbox
+                      id={'2'}
+                      checked={self.state.localBranchesDisplay[2]}
+                      onCheck={this.updateCheck}
+                      style={styles.checkbox}
 
+                      />
+                    }
+                    primaryText="Video sounds"
+                    style={styles.listItem}
                   />
-                }
-                primaryText="Video sounds"
-                style={styles.listItem}
-              />
+                ]}>
+              </ListItem>
             </List>            
           </div>
           <div>
