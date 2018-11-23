@@ -29,7 +29,7 @@ export default class App extends React.Component<any, object> {
 
     };
 
-    // this.updateCheck = this.updateCheck.bind(this);
+    this.updateCheck = this.updateCheck.bind(this);
 
   }
 
@@ -106,7 +106,7 @@ export default class App extends React.Component<any, object> {
                   <Checkbox
                   id={'0'}
                   checked={self.state.localBranchesDisplay[0]}
-                  onCheck={this.updateCheck.bind(this)}
+                  onCheck={this.updateCheck}
                   />
                 }
                 primaryText="Notifications"
@@ -116,7 +116,7 @@ export default class App extends React.Component<any, object> {
                   <Checkbox
                   id={'1'}
                   checked={self.state.localBranchesDisplay[1]}
-                  onCheck={this.updateCheck.bind(this)}
+                  onCheck={this.updateCheck}
                   />
                 }
                 primaryText="Sounds"
@@ -126,7 +126,7 @@ export default class App extends React.Component<any, object> {
                   <Checkbox
                   id={'2'}
                   checked={self.state.localBranchesDisplay[2]}
-                  onCheck={this.updateCheck.bind(this)}
+                  onCheck={this.updateCheck}
                   />
                 }
                 primaryText="Video sounds"
