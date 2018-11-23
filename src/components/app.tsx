@@ -13,18 +13,19 @@ import RaisedButton from 'material-ui/RaisedButton';
 
 export default class App extends React.Component<any, object> {
 
-  state: any;
-
-  constructor(props: any){
+  constructor(props: any) {
     super(props);
-
   }
 
   handleBrowse = () => {
 
-    const git = simplegit();
+    // const git = simplegit();
+    const git = simplegit('/Users/tedshaffer/Documents/Projects/bs-bpf-converter');
     git.status().then((status: any) => {
       console.log(status);
+    });
+    git.branch(['-r']).then((branchResults: any) => {
+      console.log(branchResults);
     });
 
     const dialog: any = remote.dialog;
@@ -46,16 +47,22 @@ export default class App extends React.Component<any, object> {
 
     const self = this;
 
+    const lineStyle = {
+      strokeWidth: '2',
+      stroke: 'red'
+    };
+
     return (
       <MuiThemeProvider>
         <div>
           <div>
             Content folder:
-            <RaisedButton label='Browse' onClick={self.handleBrowse}/>
+          <RaisedButton label='Browse' onClick={self.handleBrowse} />
           </div>
           <div>
-            BrightSign IP Address:
-            />
+            <svg height="210" width="500">
+              <line x1="0" y1="0" x2="200" y2="200" style={lineStyle} />
+            </svg>
           </div>
         </div>
       </MuiThemeProvider>
