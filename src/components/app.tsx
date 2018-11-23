@@ -12,7 +12,6 @@ import * as simplegit from 'simple-git/promise';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
 import {List, ListItem} from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
 import Checkbox from 'material-ui/Checkbox';
 
 const styles = {
@@ -45,12 +44,11 @@ export default class App extends React.Component<any, object> {
     this.state = {
       repoName: 'bacon',
       repoPath: '',
-      localBranchesDisplay: [false, false, false],
+      localBranches: [],
 
     };
 
     this.updateCheck = this.updateCheck.bind(this);
-
   }
 
   handleBrowse = () => {
@@ -80,7 +78,26 @@ export default class App extends React.Component<any, object> {
         git.branch(['-r']).then((branchResults: any) => {
           console.log(branchResults);
         });
-    
+        git.branchLocal().then((localBranchResults: any) => {
+          
+          console.log(localBranchResults);
+          const localBranches: any[] = [];
+
+          for (const branchName in localBranchResults.branches) {
+            if (localBranchResults.branches.hasOwnProperty(branchName)) {
+              const localBranch: any = localBranchResults.branches[branchName];
+              localBranches.push( {
+                display: false,
+                name: localBranch.name,
+                current: localBranch.current,
+              });
+            }
+          }
+
+          this.setState( {
+            localBranches
+          });
+        });
       }
     });
   }
@@ -89,12 +106,30 @@ export default class App extends React.Component<any, object> {
     console.log('update check invoked');
     console.log(event);
 
-    const localBranchesDisplay: any[] = this.state.localBranchesDisplay;
+    const localBranches: any[] = this.state.localBranches;
     const index: number = Number(event.target.id);
-    localBranchesDisplay[index] = !localBranchesDisplay[index];
+    localBranches[index].display = !localBranches[index].display;
     this.setState({
-      localBranchesDisplay
+      localBranches
     });
+  }
+
+  getListItem(localBranch: any, index: number) {
+    return (
+      <ListItem
+        key={index}
+        leftCheckbox={
+          <Checkbox
+            id={index.toString()}
+            checked={localBranch.display}
+            onCheck={this.updateCheck}
+            style={styles.checkbox}
+          />
+        }
+        primaryText={localBranch.name}
+        style={styles.listItem}
+      />
+    );
   }
 
   render() {
@@ -110,6 +145,10 @@ export default class App extends React.Component<any, object> {
       topMargin: '4px'
     };
 
+    const nestedItems = self.state.localBranches.map( (localBranch: any, index: number) => {
+      return self.getListItem(localBranch, index);
+    });
+
     return (
       <MuiThemeProvider>
         <div>
@@ -118,56 +157,12 @@ export default class App extends React.Component<any, object> {
             <br/>
             <p>Repo: <span style={labelStyle}>{self.state.repoName}</span></p>
 
-
             <List>
               <ListItem
                 primaryText="Local Branches"
                 initiallyOpen={true}
                 primaryTogglesNestedList={true}
-                nestedItems={[
-                  <ListItem
-                    key={0}
-                    leftCheckbox={
-                      <Checkbox
-                      id={'0'}
-                      checked={self.state.localBranchesDisplay[0]}
-                      onCheck={this.updateCheck}
-                      style={styles.checkbox}
-
-                      />
-                    }
-                    primaryText="Notifications"
-                    style={styles.listItem}
-                  />,
-                  <ListItem
-                  key={1}
-                  leftCheckbox={
-                      <Checkbox
-                      id={'1'}
-                      checked={self.state.localBranchesDisplay[1]}
-                      onCheck={this.updateCheck}
-                      style={styles.checkbox}
-
-                      />
-                    }
-                    primaryText="Sounds"
-                    style={styles.listItem}
-                  />,
-                  <ListItem
-                  key={2}
-                  leftCheckbox={
-                      <Checkbox
-                      id={'2'}
-                      checked={self.state.localBranchesDisplay[2]}
-                      onCheck={this.updateCheck}
-                      style={styles.checkbox}
-
-                      />
-                    }
-                    primaryText="Video sounds"
-                    style={styles.listItem}
-                  />
-                ]}>
+                nestedItems={nestedItems}>
               </ListItem>
             </List>            
           </div>
