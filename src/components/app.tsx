@@ -11,6 +11,16 @@ import * as simplegit from 'simple-git/promise';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
+import {List, ListItem} from 'material-ui/List';
+import Subheader from 'material-ui/Subheader';
+import Checkbox from 'material-ui/Checkbox';
+
+const styles = {
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+};
 
 export default class App extends React.Component<any, object> {
 
@@ -77,6 +87,26 @@ export default class App extends React.Component<any, object> {
             <RaisedButton label='Browse' onClick={self.handleBrowse} />
             <br/>
             <p>Repo: <span style={labelStyle}>{self.state.repoName}</span></p>
+
+
+            <List>
+              <Subheader>Hangout Notifications</Subheader>
+              <ListItem
+                leftCheckbox={<Checkbox />}
+                primaryText="Notifications"
+                secondaryText="Allow notifications"
+              />
+              <ListItem
+                leftCheckbox={<Checkbox />}
+                primaryText="Sounds"
+                secondaryText="Hangouts message"
+              />
+              <ListItem
+                leftCheckbox={<Checkbox />}
+                primaryText="Video sounds"
+                secondaryText="Hangouts video call"
+              />
+            </List>            
           </div>
           <div>
             <svg height="210" width="500">
