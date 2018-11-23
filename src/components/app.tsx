@@ -15,6 +15,26 @@ import {List, ListItem} from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 import Checkbox from 'material-ui/Checkbox';
 
+const styles = {
+  block: {
+    maxWidth: 250,
+  },
+  checkbox: {
+    marginBottom: 2,
+    marginTop: 0,
+    paddingBottom: 2,
+    paddingTop: 0,
+    top: 0,
+  },
+  listItem: {
+    marginBottom: 4,
+    marginTop: 4,
+    paddingBottom: 4,
+    paddingTop: 4,
+    paddingLeft: 42,
+  }
+};
+
 export default class App extends React.Component<any, object> {
 
   state: any;
@@ -107,9 +127,12 @@ export default class App extends React.Component<any, object> {
                   id={'0'}
                   checked={self.state.localBranchesDisplay[0]}
                   onCheck={this.updateCheck}
+                  style={styles.checkbox}
+
                   />
                 }
                 primaryText="Notifications"
+                style={styles.listItem}
               />
               <ListItem
                 leftCheckbox={
@@ -117,9 +140,12 @@ export default class App extends React.Component<any, object> {
                   id={'1'}
                   checked={self.state.localBranchesDisplay[1]}
                   onCheck={this.updateCheck}
+                  style={styles.checkbox}
+
                   />
                 }
                 primaryText="Sounds"
+                style={styles.listItem}
               />
               <ListItem
                 leftCheckbox={
@@ -127,9 +153,12 @@ export default class App extends React.Component<any, object> {
                   id={'2'}
                   checked={self.state.localBranchesDisplay[2]}
                   onCheck={this.updateCheck}
+                  style={styles.checkbox}
+
                   />
                 }
                 primaryText="Video sounds"
+                style={styles.listItem}
               />
             </List>            
           </div>
