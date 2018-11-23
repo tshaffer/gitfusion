@@ -5,6 +5,7 @@ import {
 import { isNil } from 'lodash';
 
 import * as React from 'react';
+import * as path from "path";
 
 import * as simplegit from 'simple-git/promise';
 
@@ -13,32 +14,45 @@ import RaisedButton from 'material-ui/RaisedButton';
 
 export default class App extends React.Component<any, object> {
 
+  state: any;
+
   constructor(props: any) {
     super(props);
+
+    this.state = {
+      repoName: 'bacon',
+      repoPath: '',
+    };
   }
 
   handleBrowse = () => {
 
-    // const git = simplegit();
-    const git = simplegit('/Users/tedshaffer/Documents/Projects/bs-bpf-converter');
-    git.status().then((status: any) => {
-      console.log(status);
-    });
-    git.branch(['-r']).then((branchResults: any) => {
-      console.log(branchResults);
-    });
-
     const dialog: any = remote.dialog;
     dialog.showOpenDialog({
-      defaultPath: '/Users/tedshaffer/Desktop/aa',
+      defaultPath: '/Users/tedshaffer/Documents/Projects',
       properties: [
         'openDirectory',
       ]
     }, (selectedPaths: string[]) => {
       if (!isNil(selectedPaths) && selectedPaths.length === 1) {
+
+        const repoPath = selectedPaths[0];
+        const repoName = path.basename(repoPath);
+
         this.setState({
-          contentFolder: selectedPaths[0]
+          repoPath,
+          repoName
         });
+
+        // TODO - check for error return
+        const git = simplegit(repoPath);
+        git.status().then((status: any) => {
+          console.log(status);
+        });
+        git.branch(['-r']).then((branchResults: any) => {
+          console.log(branchResults);
+        });
+    
       }
     });
   }
@@ -52,12 +66,17 @@ export default class App extends React.Component<any, object> {
       stroke: 'red'
     };
 
+    const labelStyle = {
+      topMargin: '4px'
+    };
+
     return (
       <MuiThemeProvider>
         <div>
           <div>
-            Content folder:
-          <RaisedButton label='Browse' onClick={self.handleBrowse} />
+            <RaisedButton label='Browse' onClick={self.handleBrowse} />
+            <br/>
+            <p>Repo: <span style={labelStyle}>{self.state.repoName}</span></p>
           </div>
           <div>
             <svg height="210" width="500">
