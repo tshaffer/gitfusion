@@ -25,7 +25,12 @@ export default class App extends React.Component<any, object> {
     this.state = {
       repoName: 'bacon',
       repoPath: '',
+      localBranchesDisplay: [false, false, false],
+
     };
+
+    // this.updateCheck = this.updateCheck.bind(this);
+
   }
 
   handleBrowse = () => {
@@ -44,7 +49,7 @@ export default class App extends React.Component<any, object> {
 
         this.setState({
           repoPath,
-          repoName
+          repoName,
         });
 
         // TODO - check for error return
@@ -63,6 +68,13 @@ export default class App extends React.Component<any, object> {
   updateCheck(event: any, isInputChecked: boolean) {
     console.log('update check invoked');
     console.log(event);
+
+    const localBranchesDisplay: any[] = this.state.localBranchesDisplay;
+    const index: number = Number(event.target.id);
+    localBranchesDisplay[index] = !localBranchesDisplay[index];
+    this.setState({
+      localBranchesDisplay
+    });
   }
 
   render() {
@@ -92,7 +104,8 @@ export default class App extends React.Component<any, object> {
               <ListItem
                 leftCheckbox={
                   <Checkbox
-                  id={'branch0'}
+                  id={'0'}
+                  checked={self.state.localBranchesDisplay[0]}
                   onCheck={this.updateCheck.bind(this)}
                   />
                 }
@@ -101,7 +114,8 @@ export default class App extends React.Component<any, object> {
               <ListItem
                 leftCheckbox={
                   <Checkbox
-                  id={'branch1'}
+                  id={'1'}
+                  checked={self.state.localBranchesDisplay[1]}
                   onCheck={this.updateCheck.bind(this)}
                   />
                 }
@@ -110,7 +124,8 @@ export default class App extends React.Component<any, object> {
               <ListItem
                 leftCheckbox={
                   <Checkbox
-                  id={'branch2'}
+                  id={'2'}
+                  checked={self.state.localBranchesDisplay[2]}
                   onCheck={this.updateCheck.bind(this)}
                   />
                 }
