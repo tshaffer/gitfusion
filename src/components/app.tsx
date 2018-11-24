@@ -51,6 +51,7 @@ let commitsByHash: CommitsByHash = {};
 export default class App extends React.Component<any, object> {
 
   state: any;
+// let sortedCommits: CommitOnBranches[] = [];
 
   constructor(props: any) {
     super(props);
@@ -59,7 +60,7 @@ export default class App extends React.Component<any, object> {
       repoName: 'bacon',
       repoPath: '',
       localBranches: [],
-
+      sortedCommits: [],
     };
 
     this.updateCheck = this.updateCheck.bind(this);
@@ -93,14 +94,6 @@ export default class App extends React.Component<any, object> {
           console.log(branchResults);
         });
 
-        // No point - it should be sufficient to get hashes for selected branches only
-        // retrieve commit hashes for this repo
-        // git.log(['--max-count=20']).then( (commitsSummary: ListLogSummary) => {
-        //   allCommits = commitsSummary.all.map( (commit: ListLogLine) => {
-        //     return commit;
-        //   });
-        // });
-        
         git.branchLocal().then((localBranchResults: any) => {
           
           console.log(localBranchResults);
@@ -126,6 +119,8 @@ export default class App extends React.Component<any, object> {
   }
 
   updateCheck(event: any, isInputChecked: boolean) {
+
+    console.log('updateCheck invoked');
 
     const localBranches: any[] = this.state.localBranches;
     const index: number = Number(event.target.id);
@@ -164,22 +159,42 @@ export default class App extends React.Component<any, object> {
             }
 
           });
-
-          console.log(commitsByHash);
-
+          const sortedCommits = this.resortCommits();
+          this.setState({
+            localBranches,
+            sortedCommits
+          });
         });
       });
-
-      this.setState({
-        localBranches
-      });
-
     }
     else {
+      // TODO remove deselected branch
+      const sortedCommits: CommitOnBranches[] = this.resortCommits();
       this.setState({
-        localBranches
+        localBranches,
+        sortedCommits,
       });
     }
+  }
+
+  // sort commits in preparation for render
+  // for now, assume that we want to display everything in commitsByHash
+  resortCommits(): CommitOnBranches[] {
+
+    const hashes: string[] = Object.keys(commitsByHash);
+    const sortedCommits: CommitOnBranches[] = hashes.map( (hash) => {
+      return commitsByHash[hash];
+    });
+
+    sortedCommits.sort( (a, b) => {
+      const aDate: Date = new Date(a.commitData.date);
+      const bDate: Date = new Date(b.commitData.date);
+      return bDate.valueOf() - aDate.valueOf();
+    });
+
+    console.log(sortedCommits);
+
+    return sortedCommits;
   }
 
   getListItem(localBranch: any, index: number) {
@@ -200,12 +215,28 @@ export default class App extends React.Component<any, object> {
     );
   }
 
+  getCommitListItem(commit: CommitOnBranches, index: number) {
+    return (
+      <ListItem
+        key={index}
+        primaryText={commit.commitData.message}
+        style={styles.listItem}
+      />
+    );
+  }
+
   render() {
+
+    console.log('render invoked');
 
     const self = this;
 
-    const nestedItems = self.state.localBranches.map( (localBranch: any, index: number) => {
+    const localBranches = self.state.localBranches.map( (localBranch: any, index: number) => {
       return self.getListItem(localBranch, index);
+    });
+
+    const commits = self.state.sortedCommits.map( (commit: CommitOnBranches, index: number) => {
+      return self.getCommitListItem(commit, index);
     });
 
     return (
@@ -220,9 +251,12 @@ export default class App extends React.Component<any, object> {
                 primaryText="Local Branches"
                 initiallyOpen={true}
                 primaryTogglesNestedList={true}
-                nestedItems={nestedItems}>
+                nestedItems={localBranches}>
               </ListItem>
-            </List>            
+            </List>
+            <List>
+              {commits}
+            </List>
           </div>
           <div>
             <svg height="210" width="500">
