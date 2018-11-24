@@ -31,6 +31,13 @@ const styles = {
     paddingBottom: 4,
     paddingTop: 4,
     paddingLeft: 42,
+  },
+  lineStyle: {
+    strokeWidth: '2',
+    stroke: 'red'
+  },
+  labelStyle: {
+    topMargin: '4px'
   }
 };
 
@@ -103,9 +110,6 @@ export default class App extends React.Component<any, object> {
   }
 
   updateCheck(event: any, isInputChecked: boolean) {
-    console.log('update check invoked');
-    console.log(event);
-
     const localBranches: any[] = this.state.localBranches;
     const index: number = Number(event.target.id);
     localBranches[index].display = !localBranches[index].display;
@@ -136,15 +140,6 @@ export default class App extends React.Component<any, object> {
 
     const self = this;
 
-    const lineStyle = {
-      strokeWidth: '2',
-      stroke: 'red'
-    };
-
-    const labelStyle = {
-      topMargin: '4px'
-    };
-
     const nestedItems = self.state.localBranches.map( (localBranch: any, index: number) => {
       return self.getListItem(localBranch, index);
     });
@@ -155,8 +150,7 @@ export default class App extends React.Component<any, object> {
           <div>
             <RaisedButton label='Browse' onClick={self.handleBrowse} />
             <br/>
-            <p>Repo: <span style={labelStyle}>{self.state.repoName}</span></p>
-
+            <p>Repo: <span style={styles.labelStyle}>{self.state.repoName}</span></p>
             <List>
               <ListItem
                 primaryText="Local Branches"
@@ -168,7 +162,7 @@ export default class App extends React.Component<any, object> {
           </div>
           <div>
             <svg height="210" width="500">
-              <line x1="0" y1="0" x2="200" y2="200" style={lineStyle} />
+              <line x1="0" y1="0" x2="200" y2="200" style={styles.lineStyle} />
             </svg>
           </div>
         </div>
