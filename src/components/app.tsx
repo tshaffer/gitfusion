@@ -41,6 +41,13 @@ const styles = {
   }
 };
 
+import {
+  ListLogLine, CommitsByHash, CommitOnBranches, ListLogSummary,
+} from '../gitInterfaces';
+
+let git: any = null;
+let commitsByHash: CommitsByHash = {};
+
 export default class App extends React.Component<any, object> {
 
   state: any;
@@ -78,7 +85,7 @@ export default class App extends React.Component<any, object> {
         });
 
         // TODO - check for error return
-        const git = simplegit(repoPath);
+        git = simplegit(repoPath);
         git.status().then((status: any) => {
           console.log(status);
         });
@@ -110,12 +117,58 @@ export default class App extends React.Component<any, object> {
   }
 
   updateCheck(event: any, isInputChecked: boolean) {
+
     const localBranches: any[] = this.state.localBranches;
     const index: number = Number(event.target.id);
-    localBranches[index].display = !localBranches[index].display;
-    this.setState({
-      localBranches
-    });
+    const selectedBranch: any = localBranches[index];
+    const branchName = selectedBranch.name;
+    selectedBranch.display = !selectedBranch.display;
+
+    if (selectedBranch.display) {
+
+      git.checkout(branchName).then(() => {
+        console.log(status);
+        git.log(['--max-count=4']).then( (commitsSummary: ListLogSummary) => {
+          console.log(commitsSummary);
+          commitsSummary.all.forEach( (commit: ListLogLine) => {
+            console.log(commit);
+
+            let commitOnBranches: CommitOnBranches;
+
+            if (commitsByHash.hasOwnProperty(commit.hash)) {
+              commitOnBranches = commitsByHash[commit.hash];
+              const branchNames = commitOnBranches.branchNames;
+              branchNames.push(branchName);
+
+              // TODO - use cool es6 stuff. spread or object.assign
+              commitOnBranches.branchNames = branchNames;
+              commitsByHash[commit.hash] = commitOnBranches;
+            }
+            else {
+              commitOnBranches = {
+                branchNames: branchName,
+                commitData: commit
+              };
+              commitsByHash[commit.hash] = commitOnBranches;
+            }
+
+          });
+
+          console.log(commitsByHash);
+
+        });
+      });
+
+      this.setState({
+        localBranches
+      });
+
+    }
+    else {
+      this.setState({
+        localBranches
+      });
+      }
   }
 
   getListItem(localBranch: any, index: number) {
