@@ -92,6 +92,15 @@ export default class App extends React.Component<any, object> {
         git.branch(['-r']).then((branchResults: any) => {
           console.log(branchResults);
         });
+
+        // No point - it should be sufficient to get hashes for selected branches only
+        // retrieve commit hashes for this repo
+        // git.log(['--max-count=20']).then( (commitsSummary: ListLogSummary) => {
+        //   allCommits = commitsSummary.all.map( (commit: ListLogLine) => {
+        //     return commit;
+        //   });
+        // });
+        
         git.branchLocal().then((localBranchResults: any) => {
           
           console.log(localBranchResults);
@@ -126,12 +135,14 @@ export default class App extends React.Component<any, object> {
 
     if (selectedBranch.display) {
 
+      console.log('checkout branch: ', branchName);
+
       git.checkout(branchName).then(() => {
-        console.log(status);
-        git.log(['--max-count=4']).then( (commitsSummary: ListLogSummary) => {
+        git.log(['--max-count=20']).then( (commitsSummary: ListLogSummary) => {
+          
           console.log(commitsSummary);
+
           commitsSummary.all.forEach( (commit: ListLogLine) => {
-            console.log(commit);
 
             let commitOnBranches: CommitOnBranches;
 
@@ -146,7 +157,7 @@ export default class App extends React.Component<any, object> {
             }
             else {
               commitOnBranches = {
-                branchNames: branchName,
+                branchNames: [branchName],
                 commitData: commit
               };
               commitsByHash[commit.hash] = commitOnBranches;
@@ -168,7 +179,7 @@ export default class App extends React.Component<any, object> {
       this.setState({
         localBranches
       });
-      }
+    }
   }
 
   getListItem(localBranch: any, index: number) {
