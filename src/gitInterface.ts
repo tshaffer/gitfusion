@@ -72,10 +72,45 @@ export function getLocalBranches(): LocalBranches {
 export function getGitBranchCommitHistory(): any {
 
   // const commitFormat = '%H%n%P%n%cd%n%cn%n%B%n';
-  const commitFormat = 'commit=%HparentHashes=%PcommitDate=%cdcommiterName=%cnbody=%B';
+  // const commitFormat = 'commit=%HparentHashes=%PcommitDate=%cdcommiterName=%cnbody=%B';
+  // const commitFormat = '{%n\"commits\": [%n{%n\"hash\": %H,%n\"parentHashes\": %P,%\"commitDate\": %cd, \"author\": %cn,%n\"message\": %B,%n}%n]%n}';
+  // const jsonBeginningWrapper = '{\n\"commits\": [\n'
+  // const commitFormat = '{%n\"hash\": \"%H\",%n\"parentHashes\": \"%P\",%n\"commitDate\": \"%cd\",%n\"author\": \"%cn\",%n\"message\": \"%B"\,%n},'
+  // const jsonEndingWrapper = '\n]\n}';
+  const jsonBeginningWrapper = '{\"commits\": ['
+  const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\",\"message\": \"%B"\}'
+  const jsonEndingWrapper = ']}';
 
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='%H%n%P%n%cd%n%cn%n%B%n'");
-  const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='" + commitFormat + "'");
+  // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='" + commitFormat + "'");
+  const logResults: string = gitLog("-1 --parents --date=iso-strict --format='" + commitFormat + "'");
+
+  const newLine = '\n';
+  const regex = new RegExp(newLine, 'g');
+  const strippedResults = logResults.replace(regex, '');
 
   console.log(logResults);
+  console.log(strippedResults);
+
+  const totalHistory = jsonBeginningWrapper + strippedResults + jsonEndingWrapper;
+
+  console.log(totalHistory);
+
+  // const foo: any = JSON.parse(totalHistory);
+
+  // console.log(foo);
 }
+
+/*
+{
+  "commits": [
+    {
+      "hash": <hash name>,
+      "parentHashes": <parent hashes>,
+      "commitDate": <commit date>,
+      "author": <name>,
+      "message": <commit message>,
+    }
+  ]
+}
+*/
