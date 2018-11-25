@@ -19,6 +19,26 @@ export interface CommitOnBranches {
   commitData: ListLogLine;
 }
 
+export interface Commit {
+  author: string;
+  commitDate: string;
+  hash: string;
+  message: string;
+  parentHashes: string;
+}
+
+export interface BranchCommits {
+  commits: Commit[];
+}
+
+
+
+
+
+
+
+
+
 // simple git interfaces
 export interface ListLogSummary {
   all: ListLogLine[];

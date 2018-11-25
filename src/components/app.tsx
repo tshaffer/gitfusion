@@ -55,6 +55,8 @@ import {
   ListLogLine, CommitsByHash, CommitOnBranches, ListLogSummary,
   LocalBranch,
   LocalBranches,
+  BranchCommits,
+  Commit,
 } from '../gitInterfaces';
 
 let git: any = null;
@@ -181,10 +183,6 @@ export default class App extends React.Component<any, object> {
   //   });
   // }
 
-  getBranchCommitHistory() {
-    getGitBranchCommitHistory();
-  }
-
   handleSelectBranch(event: any, isInputChecked: boolean) {
 
     const index: number = Number(event.target.id);
@@ -200,8 +198,9 @@ export default class App extends React.Component<any, object> {
       console.log('checkout branch: ', branchName);
 
       gitCheckout(branchName);
-      this.getBranchCommitHistory();
-
+      const branchCommits: BranchCommits = getGitBranchCommitHistory();
+      console.log(branchCommits);
+      
       // this.gitCheckoutBranch(branchName)
       //   .then( () => {
       //     return this.gitGetBranchCommitHistory(localBranches, branchName);

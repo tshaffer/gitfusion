@@ -1,6 +1,8 @@
 import * as shell from 'shelljs';
 
 import {
+  BranchCommits,
+  Commit,
   LocalBranch,
   LocalBranches,
 } from './gitInterfaces';
@@ -69,19 +71,13 @@ export function getLocalBranches(): LocalBranches {
   return localBranches;
 }
 
-export function getGitBranchCommitHistory(): any {
+export function getGitBranchCommitHistory(): BranchCommits {
 
   // const commitFormat = '%H%n%P%n%cd%n%cn%n%B%n';
   // const commitFormat = 'commit=%HparentHashes=%PcommitDate=%cdcommiterName=%cnbody=%B';
   // const commitFormat = '{%n\"commits\": [%n{%n\"hash\": %H,%n\"parentHashes\": %P,%\"commitDate\": %cd, \"author\": %cn,%n\"message\": %B,%n}%n]%n}';
-  // const jsonBeginningWrapper = '{\n\"commits\": [\n'
   // const commitFormat = '{%n\"hash\": \"%H\",%n\"parentHashes\": \"%P\",%n\"commitDate\": \"%cd\",%n\"author\": \"%cn\",%n\"message\": \"%B"\,%n},'
-  // const jsonEndingWrapper = '\n]\n}';
-  // const jsonBeginningWrapper = '{\"commits\": ['
-  const jsonBeginningWrapper = '{\"commits\": ['
   const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\",\"message\": \"%B"\}'
-  const jsonEndingWrapper = ']}';
-  // const jsonEndingWrapper = ']}';
 
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='%H%n%P%n%cd%n%cn%n%B%n'");
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='" + commitFormat + "'");
@@ -95,32 +91,24 @@ export function getGitBranchCommitHistory(): any {
   const adjacentElementRegex = new RegExp(adjacentObjects, 'g');
   const formattedResults = strippedResults.replace(adjacentElementRegex, '},{');
 
-  console.log(logResults);
-  console.log(strippedResults);
-  console.log(formattedResults);
+  const unTypedCommits: any = JSON.parse('[' + formattedResults + ']');
 
-  const commitHistory = jsonBeginningWrapper + formattedResults + jsonEndingWrapper;
+  const branchCommits: BranchCommits = {
+    commits: []
+  };
 
-  console.log(commitHistory);
-
-  // const commits: any = JSON.parse(commitHistory);
-  // let commits: any = {};
-  // commits = Object.assign({}, JSON.parse(commitHistory));
-  const commits: any = JSON.parse('[' + formattedResults + ']');
-
-  console.log(commits);
-}
-
-/*
-{
-  "commits": [
-    {
-      "hash": <hash name>,
-      "parentHashes": <parent hashes>,
-      "commitDate": <commit date>,
-      "author": <name>,
-      "message": <commit message>,
+  branchCommits.commits = unTypedCommits.map( (unTypedCommit: any) => {
+    const { author, commitDate, hash, message, parentHashes } = unTypedCommit;
+    return {
+      author,
+      commitDate,
+      hash,
+      message,
+      parentHashes,
     }
-  ]
+  });
+
+  console.log(branchCommits);
+
+  return branchCommits;
 }
-*/
