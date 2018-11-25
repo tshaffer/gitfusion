@@ -21,8 +21,12 @@ export function gitFetch(): string {
   return shell.exec('git fetch').stdout;
 }
 
-export function gitLog(): string {
-  return shell.exec('git log -1').stdout;
+export function gitCheckout(branchName: string): string {
+  return shell.exec('git checkout ' + branchName).stdout;
+}
+
+export function gitLog(optionSpec: string): string {
+  return shell.exec('git log ' + optionSpec).stdout;
 }
 
 export function gitBranch(options: string): string {
@@ -63,4 +67,9 @@ export function getLocalBranches(): LocalBranches {
   });
 
   return localBranches;
+}
+
+export function getGitBranchCommitHistory(): any {
+  const logResults: string = gitLog('-1');
+  console.log(logResults);
 }

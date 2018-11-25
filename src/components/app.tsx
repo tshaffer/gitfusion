@@ -14,12 +14,14 @@ import Checkbox from 'material-ui/Checkbox';
 
 import {
   cd,
+  gitCheckout,
   gitStatus,
   gitFetch,
   gitLog,
   gitBranch,
   shellInit,
   getLocalBranches,
+  getGitBranchCommitHistory,
 } from '../gitInterface';
 
 const styles = {
@@ -60,8 +62,8 @@ let commitsByHash: CommitsByHash = {};
 
 interface AppState {
   repoName: string;
-  repoPath: string;
-  localBranches: LocalBranch[];
+  repoPath: string; // TODO - may not be required as a state variable
+  localBranches: LocalBranches;
   sortedCommits: any[];
 }
 
@@ -77,12 +79,15 @@ export default class App extends React.Component<any, object> {
     this.state = {
       repoName: '',
       repoPath: '',
-      localBranches: [],
+      localBranches: {
+        currentBranch: null,
+        branches: [],
+      },
       sortedCommits: [],
     };
 
     this.handleBrowse = this.handleBrowse.bind(this);
-    this.updateCheck = this.updateCheck.bind(this);
+    this.handleSelectBranch = this.handleSelectBranch.bind(this);
 
   }
 
@@ -100,20 +105,17 @@ export default class App extends React.Component<any, object> {
         const repoPath = selectedPaths[0];
         const repoName = path.basename(repoPath);
 
-        this.setState({
-          repoPath,
-          repoName,
-        });
-
         // TODO - check for error return
         cd(repoPath);
 
         const status = gitStatus();
         
-        const localBranches = getLocalBranches();
+        const localBranches: LocalBranches = getLocalBranches();
         console.log(localBranches);
 
         this.setState( {
+          repoPath,
+          repoName,
           localBranches
         });
       }
@@ -137,55 +139,58 @@ export default class App extends React.Component<any, object> {
     // });
   }
 
-  gitGetBranchCommitHistory(localBranches: any[], branchName: string): Promise<void> {
+  // gitGetBranchCommitHistory(localBranches: any[], branchName: string): Promise<void> {
 
-    return new Promise((resolve, reject) => {
+  //   return new Promise((resolve, reject) => {
 
-      // git.log(['--max-count=10', '--format=fuller']).then( (commitsSummary: ListLogSummary) => {
-      git.log(['--max-count=10']).then( (commitsSummary: ListLogSummary) => {
+  //     // git.log(['--max-count=10', '--format=fuller']).then( (commitsSummary: ListLogSummary) => {
+  //     git.log(['--max-count=10']).then( (commitsSummary: ListLogSummary) => {
           
-        console.log(commitsSummary);
+  //       console.log(commitsSummary);
   
-        commitsSummary.all.forEach( (commit: ListLogLine) => {
+  //       commitsSummary.all.forEach( (commit: ListLogLine) => {
   
-          let commitOnBranches: CommitOnBranches;
+  //         let commitOnBranches: CommitOnBranches;
   
-          if (commitsByHash.hasOwnProperty(commit.hash)) {
-            commitOnBranches = commitsByHash[commit.hash];
-            const branchNames = commitOnBranches.branchNames;
-            branchNames.push(branchName);
+  //         if (commitsByHash.hasOwnProperty(commit.hash)) {
+  //           commitOnBranches = commitsByHash[commit.hash];
+  //           const branchNames = commitOnBranches.branchNames;
+  //           branchNames.push(branchName);
   
-            // TODO - use cool es6 stuff. spread or object.assign
-            commitOnBranches.branchNames = branchNames;
-            commitsByHash[commit.hash] = commitOnBranches;
-          }
-          else {
-            commitOnBranches = {
-              branchNames: [branchName],
-              commitData: commit
-            };
-            commitsByHash[commit.hash] = commitOnBranches;
-          }
+  //           // TODO - use cool es6 stuff. spread or object.assign
+  //           commitOnBranches.branchNames = branchNames;
+  //           commitsByHash[commit.hash] = commitOnBranches;
+  //         }
+  //         else {
+  //           commitOnBranches = {
+  //             branchNames: [branchName],
+  //             commitData: commit
+  //           };
+  //           commitsByHash[commit.hash] = commitOnBranches;
+  //         }
   
-        });
-        const sortedCommits = this.resortCommits();
-        this.setState({
-          localBranches,
-          sortedCommits
-        });
+  //       });
+  //       const sortedCommits = this.resortCommits();
+  //       this.setState({
+  //         localBranches,
+  //         sortedCommits
+  //       });
 
-        Promise.resolve(1);
-      });
-    });
-}
+  //       Promise.resolve(1);
+  //     });
+  //   });
+  // }
 
+  getBranchCommitHistory() {
+    getGitBranchCommitHistory();
+  }
 
-  updateCheck(event: any, isInputChecked: boolean) {
+  handleSelectBranch(event: any, isInputChecked: boolean) {
 
     const index: number = Number(event.target.id);
 
-    const localBranches: any[] = this.state.localBranches;
-    const selectedBranch: any = localBranches[index];
+    const localBranches: LocalBranches = this.state.localBranches;
+    const selectedBranch: LocalBranch = localBranches.branches[index];
     selectedBranch.display = !selectedBranch.display;
 
     const branchName = selectedBranch.name;
@@ -194,37 +199,40 @@ export default class App extends React.Component<any, object> {
 
       console.log('checkout branch: ', branchName);
 
-      this.gitCheckoutBranch(branchName)
-        .then( () => {
-          return this.gitGetBranchCommitHistory(localBranches, branchName);
-        })
-        .then( () => {
-          console.log('Update branch commit history complete');
-        });
-    }
-    else {
+      gitCheckout(branchName);
+      this.getBranchCommitHistory();
 
-      Object.keys(commitsByHash).forEach( (commitHash: string) => {
-        if (commitsByHash.hasOwnProperty(commitHash)) {
-          const commit: CommitOnBranches = commitsByHash[commitHash];
-          const commitBranches: string[] = commit.branchNames;
-          const indexOfBranchName = commitBranches.indexOf(branchName);
-          if (indexOfBranchName >= 0) {
-            commitBranches.splice(indexOfBranchName, 1);
-            if (commitBranches.length === 0) {
-              // reference count down to zero; remove commit
-              delete commitsByHash[commitHash];
-            }
-          }
-        }
-      });
-
-      const sortedCommits: CommitOnBranches[] = this.resortCommits();
-      this.setState({
-        localBranches,
-        sortedCommits,
-      });
+      // this.gitCheckoutBranch(branchName)
+      //   .then( () => {
+      //     return this.gitGetBranchCommitHistory(localBranches, branchName);
+      //   })
+      //   .then( () => {
+      //     console.log('Update branch commit history complete');
+      //   });
     }
+    // else {
+
+    //   Object.keys(commitsByHash).forEach( (commitHash: string) => {
+    //     if (commitsByHash.hasOwnProperty(commitHash)) {
+    //       const commit: CommitOnBranches = commitsByHash[commitHash];
+    //       const commitBranches: string[] = commit.branchNames;
+    //       const indexOfBranchName = commitBranches.indexOf(branchName);
+    //       if (indexOfBranchName >= 0) {
+    //         commitBranches.splice(indexOfBranchName, 1);
+    //         if (commitBranches.length === 0) {
+    //           // reference count down to zero; remove commit
+    //           delete commitsByHash[commitHash];
+    //         }
+    //       }
+    //     }
+    //   });
+
+    //   const sortedCommits: CommitOnBranches[] = this.resortCommits();
+    //   this.setState({
+    //     localBranches,
+    //     sortedCommits,
+    //   });
+    // }
   }
 
   // sort commits in preparation for render
@@ -247,7 +255,7 @@ export default class App extends React.Component<any, object> {
     return sortedCommits;
   }
 
-  getListItem(localBranch: any, index: number) {
+  getListItem(localBranch: LocalBranch, index: number) {
     return (
       <ListItem
         key={index}
@@ -255,7 +263,7 @@ export default class App extends React.Component<any, object> {
           <Checkbox
             id={index.toString()}
             checked={localBranch.display}
-            onCheck={this.updateCheck}
+            onCheck={this.handleSelectBranch}
             style={styles.checkbox}
           />
         }
@@ -277,7 +285,7 @@ export default class App extends React.Component<any, object> {
 
   render() {
 
-    const localBranches = this.state.localBranches.map( (localBranch: any, index: number) => {
+    const localBranches = this.state.localBranches.branches.map( (localBranch: any, index: number) => {
       return this.getListItem(localBranch, index);
     });
 
