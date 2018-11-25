@@ -63,6 +63,7 @@ export default class App extends React.Component<any, object> {
       sortedCommits: [],
     };
 
+    this.handleBrowse = this.handleBrowse.bind(this);
     this.updateCheck = this.updateCheck.bind(this);
   }
 
@@ -118,57 +119,93 @@ export default class App extends React.Component<any, object> {
     });
   }
 
+  gitCheckoutBranch(branchName: string): Promise<void> {
+
+    return git.checkout(branchName);
+  
+  }
+
+  gitGetBranchCommitHistory(localBranches: any[], branchName: string): Promise<void> {
+
+    return new Promise((resolve, reject) => {
+
+      git.log(['--max-count=10']).then( (commitsSummary: ListLogSummary) => {
+          
+        console.log(commitsSummary);
+  
+        commitsSummary.all.forEach( (commit: ListLogLine) => {
+  
+          let commitOnBranches: CommitOnBranches;
+  
+          if (commitsByHash.hasOwnProperty(commit.hash)) {
+            commitOnBranches = commitsByHash[commit.hash];
+            const branchNames = commitOnBranches.branchNames;
+            branchNames.push(branchName);
+  
+            // TODO - use cool es6 stuff. spread or object.assign
+            commitOnBranches.branchNames = branchNames;
+            commitsByHash[commit.hash] = commitOnBranches;
+          }
+          else {
+            commitOnBranches = {
+              branchNames: [branchName],
+              commitData: commit
+            };
+            commitsByHash[commit.hash] = commitOnBranches;
+          }
+  
+        });
+        const sortedCommits = this.resortCommits();
+        this.setState({
+          localBranches,
+          sortedCommits
+        });
+
+        Promise.resolve(1);
+      });
+    });
+}
+
+
   updateCheck(event: any, isInputChecked: boolean) {
 
-    console.log('updateCheck invoked');
+    const index: number = Number(event.target.id);
 
     const localBranches: any[] = this.state.localBranches;
-    const index: number = Number(event.target.id);
     const selectedBranch: any = localBranches[index];
-    const branchName = selectedBranch.name;
     selectedBranch.display = !selectedBranch.display;
+
+    const branchName = selectedBranch.name;
 
     if (selectedBranch.display) {
 
       console.log('checkout branch: ', branchName);
 
-      git.checkout(branchName).then(() => {
-        git.log(['--max-count=20']).then( (commitsSummary: ListLogSummary) => {
-          
-          console.log(commitsSummary);
-
-          commitsSummary.all.forEach( (commit: ListLogLine) => {
-
-            let commitOnBranches: CommitOnBranches;
-
-            if (commitsByHash.hasOwnProperty(commit.hash)) {
-              commitOnBranches = commitsByHash[commit.hash];
-              const branchNames = commitOnBranches.branchNames;
-              branchNames.push(branchName);
-
-              // TODO - use cool es6 stuff. spread or object.assign
-              commitOnBranches.branchNames = branchNames;
-              commitsByHash[commit.hash] = commitOnBranches;
-            }
-            else {
-              commitOnBranches = {
-                branchNames: [branchName],
-                commitData: commit
-              };
-              commitsByHash[commit.hash] = commitOnBranches;
-            }
-
-          });
-          const sortedCommits = this.resortCommits();
-          this.setState({
-            localBranches,
-            sortedCommits
-          });
+      this.gitCheckoutBranch(branchName)
+        .then( () => {
+          return this.gitGetBranchCommitHistory(localBranches, branchName);
+        })
+        .then( () => {
+          console.log('Update branch commit history complete');
         });
-      });
     }
     else {
-      // TODO remove deselected branch
+
+      Object.keys(commitsByHash).forEach( (commitHash: string) => {
+        if (commitsByHash.hasOwnProperty(commitHash)) {
+          const commit: CommitOnBranches = commitsByHash[commitHash];
+          const commitBranches: string[] = commit.branchNames;
+          const indexOfBranchName = commitBranches.indexOf(branchName);
+          if (indexOfBranchName >= 0) {
+            commitBranches.splice(indexOfBranchName, 1);
+            if (commitBranches.length === 0) {
+              // reference count down to zero; remove commit
+              delete commitsByHash[commitHash];
+            }
+          }
+        }
+      });
+
       const sortedCommits: CommitOnBranches[] = this.resortCommits();
       this.setState({
         localBranches,
@@ -227,25 +264,21 @@ export default class App extends React.Component<any, object> {
 
   render() {
 
-    console.log('render invoked');
-
-    const self = this;
-
-    const localBranches = self.state.localBranches.map( (localBranch: any, index: number) => {
-      return self.getListItem(localBranch, index);
+    const localBranches = this.state.localBranches.map( (localBranch: any, index: number) => {
+      return this.getListItem(localBranch, index);
     });
 
-    const commits = self.state.sortedCommits.map( (commit: CommitOnBranches, index: number) => {
-      return self.getCommitListItem(commit, index);
+    const commits = this.state.sortedCommits.map( (commit: CommitOnBranches, index: number) => {
+      return this.getCommitListItem(commit, index);
     });
 
     return (
       <MuiThemeProvider>
         <div>
           <div>
-            <RaisedButton label='Browse' onClick={self.handleBrowse} />
+            <RaisedButton label='Browse' onClick={this.handleBrowse} />
             <br/>
-            <p>Repo: <span style={styles.labelStyle}>{self.state.repoName}</span></p>
+            <p>Repo: <span style={styles.labelStyle}>{this.state.repoName}</span></p>
             <List>
               <ListItem
                 primaryText="Local Branches"
