@@ -7,12 +7,20 @@ import { isNil } from 'lodash';
 import * as React from 'react';
 import * as path from "path";
 
-import * as simplegit from 'simple-git/promise';
-
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
 import {List, ListItem} from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
+
+import {
+  cd,
+  gitStatus,
+  gitFetch,
+  gitLog,
+  gitBranch,
+  shellInit,
+  getLocalBranches,
+} from '../gitInterface';
 
 const styles = {
   block: {
@@ -51,7 +59,6 @@ let commitsByHash: CommitsByHash = {};
 export default class App extends React.Component<any, object> {
 
   state: any;
-// let sortedCommits: CommitOnBranches[] = [];
 
   constructor(props: any) {
     super(props);
@@ -65,6 +72,8 @@ export default class App extends React.Component<any, object> {
 
     this.handleBrowse = this.handleBrowse.bind(this);
     this.updateCheck = this.updateCheck.bind(this);
+
+    shellInit();
   }
 
   handleBrowse = () => {
@@ -87,34 +96,41 @@ export default class App extends React.Component<any, object> {
         });
 
         // TODO - check for error return
-        git = simplegit(repoPath);
-        git.status().then((status: any) => {
-          console.log(status);
-        });
-        git.branch(['-r']).then((branchResults: any) => {
-          console.log(branchResults);
-        });
+        cd(repoPath);
 
-        git.branchLocal().then((localBranchResults: any) => {
+        const status = gitStatus();
+        
+        const localBranches = getLocalBranches();
+        console.log(localBranches);
+        
+        // git = simplegit(repoPath);
+        // git.status().then((status: any) => {
+        //   console.log(status);
+        // });
+        // git.branch(['-r']).then((branchResults: any) => {
+        //   console.log(branchResults);
+        // });
+
+        // git.branchLocal().then((localBranchResults: any) => {
           
-          console.log(localBranchResults);
-          const localBranches: any[] = [];
+        //   console.log(localBranchResults);
+        //   const localBranches: any[] = [];
 
-          for (const branchName in localBranchResults.branches) {
-            if (localBranchResults.branches.hasOwnProperty(branchName)) {
-              const localBranch: any = localBranchResults.branches[branchName];
-              localBranches.push( {
-                display: false,
-                name: localBranch.name,
-                current: localBranch.current,
-              });
-            }
-          }
+        //   for (const branchName in localBranchResults.branches) {
+        //     if (localBranchResults.branches.hasOwnProperty(branchName)) {
+        //       const localBranch: any = localBranchResults.branches[branchName];
+        //       localBranches.push( {
+        //         display: false,
+        //         name: localBranch.name,
+        //         current: localBranch.current,
+        //       });
+        //     }
+        //   }
 
-          this.setState( {
-            localBranches
-          });
-        });
+        //   this.setState( {
+        //     localBranches
+        //   });
+        // });
       }
     });
   }
