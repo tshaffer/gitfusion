@@ -70,6 +70,7 @@ export function getLocalBranches(): LocalBranches {
 }
 
 export function getGitBranchCommitHistory(): any {
-  const logResults: string = gitLog('-1');
+  const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='%H%n%P%n%cd%n%cn%n%B%n'");
+
   console.log(logResults);
 }
