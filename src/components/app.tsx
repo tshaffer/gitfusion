@@ -122,13 +122,25 @@ export default class App extends React.Component<any, object> {
   gitCheckoutBranch(branchName: string): Promise<void> {
 
     return git.checkout(branchName);
-  
+    // return new Promise( (resolve, reject) => {
+    //   git.checkout(branchName);
+    //   // git.raw('/Users/tedshaffer/Documents/Projects/fb24-0/bacon')(
+    //   git.raw(
+    //       [
+    //       'log',
+    //       // '--max-count=10'
+    //     ], (err: any, result: any) => {
+    //       debugger;
+    //     }
+    //   );
+    // });
   }
 
   gitGetBranchCommitHistory(localBranches: any[], branchName: string): Promise<void> {
 
     return new Promise((resolve, reject) => {
 
+      // git.log(['--max-count=10', '--format=fuller']).then( (commitsSummary: ListLogSummary) => {
       git.log(['--max-count=10']).then( (commitsSummary: ListLogSummary) => {
           
         console.log(commitsSummary);
