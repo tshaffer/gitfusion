@@ -51,20 +51,31 @@ const styles = {
 
 import {
   ListLogLine, CommitsByHash, CommitOnBranches, ListLogSummary,
+  LocalBranch,
+  LocalBranches,
 } from '../gitInterfaces';
 
 let git: any = null;
 let commitsByHash: CommitsByHash = {};
 
+interface AppState {
+  repoName: string;
+  repoPath: string;
+  localBranches: LocalBranch[];
+  sortedCommits: any[];
+}
+
 export default class App extends React.Component<any, object> {
 
-  state: any;
+  state: AppState;
 
   constructor(props: any) {
     super(props);
 
+    shellInit();
+
     this.state = {
-      repoName: 'bacon',
+      repoName: '',
       repoPath: '',
       localBranches: [],
       sortedCommits: [],
@@ -73,7 +84,6 @@ export default class App extends React.Component<any, object> {
     this.handleBrowse = this.handleBrowse.bind(this);
     this.updateCheck = this.updateCheck.bind(this);
 
-    shellInit();
   }
 
   handleBrowse = () => {
@@ -102,35 +112,10 @@ export default class App extends React.Component<any, object> {
         
         const localBranches = getLocalBranches();
         console.log(localBranches);
-        
-        // git = simplegit(repoPath);
-        // git.status().then((status: any) => {
-        //   console.log(status);
-        // });
-        // git.branch(['-r']).then((branchResults: any) => {
-        //   console.log(branchResults);
-        // });
 
-        // git.branchLocal().then((localBranchResults: any) => {
-          
-        //   console.log(localBranchResults);
-        //   const localBranches: any[] = [];
-
-        //   for (const branchName in localBranchResults.branches) {
-        //     if (localBranchResults.branches.hasOwnProperty(branchName)) {
-        //       const localBranch: any = localBranchResults.branches[branchName];
-        //       localBranches.push( {
-        //         display: false,
-        //         name: localBranch.name,
-        //         current: localBranch.current,
-        //       });
-        //     }
-        //   }
-
-        //   this.setState( {
-        //     localBranches
-        //   });
-        // });
+        this.setState( {
+          localBranches
+        });
       }
     });
   }

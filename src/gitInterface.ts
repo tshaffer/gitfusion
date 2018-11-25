@@ -44,7 +44,8 @@ export function getLocalBranches(): LocalBranches {
     let localBranch: LocalBranch;
     if (branchResultEntity.startsWith('*')) {
       localBranch = {
-        name: branchResultEntity.substring(2)
+        name: branchResultEntity.substring(2),
+        display: true,
       }
       localBranches.currentBranch = localBranch;
       localBranches.branches.push(localBranch);
@@ -53,7 +54,8 @@ export function getLocalBranches(): LocalBranches {
       const trimmedBranchName = branchResultEntity.trim();
       if (trimmedBranchName.length > 0) {
         localBranch = {
-          name: trimmedBranchName
+          name: trimmedBranchName,
+          display: false,
         }
         localBranches.branches.push(localBranch);
       }

@@ -1,7 +1,8 @@
 import { MapsLocalBar } from "material-ui/svg-icons";
 
 export interface LocalBranch {
-  name: string
+  name: string,
+  display: boolean,
 }
 
 export interface LocalBranches {
