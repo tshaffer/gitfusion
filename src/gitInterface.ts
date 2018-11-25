@@ -77,28 +77,38 @@ export function getGitBranchCommitHistory(): any {
   // const jsonBeginningWrapper = '{\n\"commits\": [\n'
   // const commitFormat = '{%n\"hash\": \"%H\",%n\"parentHashes\": \"%P\",%n\"commitDate\": \"%cd\",%n\"author\": \"%cn\",%n\"message\": \"%B"\,%n},'
   // const jsonEndingWrapper = '\n]\n}';
+  // const jsonBeginningWrapper = '{\"commits\": ['
   const jsonBeginningWrapper = '{\"commits\": ['
   const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\",\"message\": \"%B"\}'
   const jsonEndingWrapper = ']}';
+  // const jsonEndingWrapper = ']}';
 
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='%H%n%P%n%cd%n%cn%n%B%n'");
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='" + commitFormat + "'");
-  const logResults: string = gitLog("-1 --parents --date=iso-strict --format='" + commitFormat + "'");
+  const logResults: string = gitLog("-3 --parents --date=iso-strict --format='" + commitFormat + "'");
 
   const newLine = '\n';
-  const regex = new RegExp(newLine, 'g');
-  const strippedResults = logResults.replace(regex, '');
+  const newLineRegex = new RegExp(newLine, 'g');
+  const strippedResults = logResults.replace(newLineRegex, '');
+
+  const adjacentObjects = '}{';
+  const adjacentElementRegex = new RegExp(adjacentObjects, 'g');
+  const formattedResults = strippedResults.replace(adjacentElementRegex, '},{');
 
   console.log(logResults);
   console.log(strippedResults);
+  console.log(formattedResults);
 
-  const totalHistory = jsonBeginningWrapper + strippedResults + jsonEndingWrapper;
+  const commitHistory = jsonBeginningWrapper + formattedResults + jsonEndingWrapper;
 
-  console.log(totalHistory);
+  console.log(commitHistory);
 
-  // const foo: any = JSON.parse(totalHistory);
+  // const commits: any = JSON.parse(commitHistory);
+  // let commits: any = {};
+  // commits = Object.assign({}, JSON.parse(commitHistory));
+  const commits: any = JSON.parse('[' + formattedResults + ']');
 
-  // console.log(foo);
+  console.log(commits);
 }
 
 /*
