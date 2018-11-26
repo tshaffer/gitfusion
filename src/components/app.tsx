@@ -45,7 +45,12 @@ const styles = {
   },
   labelStyle: {
     topMargin: '4px'
-  }
+  },
+  textSmall: {
+    // fontStyle: 'italic',
+    fontSize: '13px',
+    fontFamily: 'sans-serif'
+  },
 };
 
 import {
@@ -267,6 +272,20 @@ export default class App extends React.Component<any, object> {
           <div>
             <svg height="210" width="500">
               <line x1="0" y1="0" x2="200" y2="200" style={styles.lineStyle} />
+              <text
+                style={styles.textSmall}
+                x="50" 
+                y="55"
+              >
+                Example Text 0
+              </text>
+              <text
+                style={styles.textSmall}
+                x="50" 
+                y="75"
+              >
+                Example Text 1
+              </text>
             </svg>
           </div>
         </div>
