@@ -9,7 +9,7 @@ import * as path from "path";
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
-import {List, ListItem} from 'material-ui/List';
+import { List, ListItem } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
 
 import {
@@ -21,7 +21,7 @@ import {
   gitBranch,
   shellInit,
   getLocalBranches,
-  getGitBranchCommitHistory,
+  getBranchCommits,
 } from '../gitInterface';
 
 const styles = {
@@ -111,11 +111,11 @@ export default class App extends React.Component<any, object> {
         cd(repoPath);
 
         const status = gitStatus();
-        
+
         const localBranches: LocalBranches = getLocalBranches();
         console.log(localBranches);
 
-        this.setState( {
+        this.setState({
           repoPath,
           repoName,
           localBranches
@@ -124,64 +124,56 @@ export default class App extends React.Component<any, object> {
     });
   }
 
-  gitCheckoutBranch(branchName: string): Promise<void> {
+  mergeBranchCommits(branchName: string, branchCommits: BranchCommits) {
+    
+    branchCommits.commits.forEach((commit: Commit) => {
+      let commitOnBranches: CommitOnBranches;
+      if (commitsByHash.hasOwnProperty(commit.hash)) {
+        commitOnBranches = commitsByHash[commit.hash];
+        const branchNames = commitOnBranches.branchNames;
+        branchNames.push(branchName);
 
-    return git.checkout(branchName);
-    // return new Promise( (resolve, reject) => {
-    //   git.checkout(branchName);
-    //   // git.raw('/Users/tedshaffer/Documents/Projects/fb24-0/bacon')(
-    //   git.raw(
-    //       [
-    //       'log',
-    //       // '--max-count=10'
-    //     ], (err: any, result: any) => {
-    //       debugger;
-    //     }
-    //   );
-    // });
+        // TODO - are the next two lines necessary, as the variables are 'by reference'?
+        // TODO - use cool es6 stuff. spread or object.assign
+        commitOnBranches.branchNames = branchNames;
+        commitsByHash[commit.hash] = commitOnBranches;
+      }
+      else {
+        commitOnBranches = {
+          branchNames: [branchName],
+          commitData: commit
+        };
+        commitsByHash[commit.hash] = commitOnBranches;
+      }
+    });
+
+    const sortedCommits = this.resortCommits();
+    this.setState({
+      sortedCommits
+    });
   }
 
-  // gitGetBranchCommitHistory(localBranches: any[], branchName: string): Promise<void> {
+  removeBranchCommits(branchName: string) {
+    Object.keys(commitsByHash).forEach( (commitHash: string) => {
+      if (commitsByHash.hasOwnProperty(commitHash)) {
+        const commit: CommitOnBranches = commitsByHash[commitHash];
+        const commitBranches: string[] = commit.branchNames;
+        const indexOfBranchName = commitBranches.indexOf(branchName);
+        if (indexOfBranchName >= 0) {
+          commitBranches.splice(indexOfBranchName, 1);
+          if (commitBranches.length === 0) {
+            // reference count down to zero; remove commit
+            delete commitsByHash[commitHash];
+          }
+        }
+      }
+    });
 
-  //   return new Promise((resolve, reject) => {
-
-  //     // git.log(['--max-count=10', '--format=fuller']).then( (commitsSummary: ListLogSummary) => {
-  //     git.log(['--max-count=10']).then( (commitsSummary: ListLogSummary) => {
-          
-  //       console.log(commitsSummary);
-  
-  //       commitsSummary.all.forEach( (commit: ListLogLine) => {
-  
-  //         let commitOnBranches: CommitOnBranches;
-  
-  //         if (commitsByHash.hasOwnProperty(commit.hash)) {
-  //           commitOnBranches = commitsByHash[commit.hash];
-  //           const branchNames = commitOnBranches.branchNames;
-  //           branchNames.push(branchName);
-  
-  //           // TODO - use cool es6 stuff. spread or object.assign
-  //           commitOnBranches.branchNames = branchNames;
-  //           commitsByHash[commit.hash] = commitOnBranches;
-  //         }
-  //         else {
-  //           commitOnBranches = {
-  //             branchNames: [branchName],
-  //             commitData: commit
-  //           };
-  //           commitsByHash[commit.hash] = commitOnBranches;
-  //         }
-  
-  //       });
-  //       const sortedCommits = this.resortCommits();
-  //       this.setState({
-  //         localBranches,
-  //         sortedCommits
-  //       });
-
-  //       Promise.resolve(1);
-  //     });
-  //   });
-  // }
+    const sortedCommits: CommitOnBranches[] = this.resortCommits();
+    this.setState({
+      sortedCommits,
+    });
+  }
 
   handleSelectBranch(event: any, isInputChecked: boolean) {
 
@@ -194,44 +186,13 @@ export default class App extends React.Component<any, object> {
     const branchName = selectedBranch.name;
 
     if (selectedBranch.display) {
-
-      console.log('checkout branch: ', branchName);
-
       gitCheckout(branchName);
-      const branchCommits: BranchCommits = getGitBranchCommitHistory();
-      console.log(branchCommits);
-      
-      // this.gitCheckoutBranch(branchName)
-      //   .then( () => {
-      //     return this.gitGetBranchCommitHistory(localBranches, branchName);
-      //   })
-      //   .then( () => {
-      //     console.log('Update branch commit history complete');
-      //   });
+      const branchCommits: BranchCommits = getBranchCommits();
+      this.mergeBranchCommits(branchName, branchCommits);
     }
-    // else {
-
-    //   Object.keys(commitsByHash).forEach( (commitHash: string) => {
-    //     if (commitsByHash.hasOwnProperty(commitHash)) {
-    //       const commit: CommitOnBranches = commitsByHash[commitHash];
-    //       const commitBranches: string[] = commit.branchNames;
-    //       const indexOfBranchName = commitBranches.indexOf(branchName);
-    //       if (indexOfBranchName >= 0) {
-    //         commitBranches.splice(indexOfBranchName, 1);
-    //         if (commitBranches.length === 0) {
-    //           // reference count down to zero; remove commit
-    //           delete commitsByHash[commitHash];
-    //         }
-    //       }
-    //     }
-    //   });
-
-    //   const sortedCommits: CommitOnBranches[] = this.resortCommits();
-    //   this.setState({
-    //     localBranches,
-    //     sortedCommits,
-    //   });
-    // }
+    else {
+      this.removeBranchCommits(branchName);
+    }
   }
 
   // sort commits in preparation for render
@@ -239,13 +200,13 @@ export default class App extends React.Component<any, object> {
   resortCommits(): CommitOnBranches[] {
 
     const hashes: string[] = Object.keys(commitsByHash);
-    const sortedCommits: CommitOnBranches[] = hashes.map( (hash) => {
+    const sortedCommits: CommitOnBranches[] = hashes.map((hash) => {
       return commitsByHash[hash];
     });
 
-    sortedCommits.sort( (a, b) => {
-      const aDate: Date = new Date(a.commitData.date);
-      const bDate: Date = new Date(b.commitData.date);
+    sortedCommits.sort((a, b) => {
+      const aDate: Date = new Date(a.commitData.commitDate);
+      const bDate: Date = new Date(b.commitData.commitDate);
       return bDate.valueOf() - aDate.valueOf();
     });
 
@@ -284,11 +245,11 @@ export default class App extends React.Component<any, object> {
 
   render() {
 
-    const localBranches = this.state.localBranches.branches.map( (localBranch: any, index: number) => {
+    const localBranches = this.state.localBranches.branches.map((localBranch: any, index: number) => {
       return this.getListItem(localBranch, index);
     });
 
-    const commits = this.state.sortedCommits.map( (commit: CommitOnBranches, index: number) => {
+    const commits = this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
       return this.getCommitListItem(commit, index);
     });
 
@@ -297,7 +258,7 @@ export default class App extends React.Component<any, object> {
         <div>
           <div>
             <RaisedButton label='Browse' onClick={this.handleBrowse} />
-            <br/>
+            <br />
             <p>Repo: <span style={styles.labelStyle}>{this.state.repoName}</span></p>
             <List>
               <ListItem

@@ -16,7 +16,7 @@ export interface CommitsByHash {
 
 export interface CommitOnBranches {
   branchNames: string[];
-  commitData: ListLogLine;
+  commitData: Commit;
 }
 
 export interface Commit {

@@ -71,7 +71,7 @@ export function getLocalBranches(): LocalBranches {
   return localBranches;
 }
 
-export function getGitBranchCommitHistory(): BranchCommits {
+export function getBranchCommits(): BranchCommits {
 
   // const commitFormat = '%H%n%P%n%cd%n%cn%n%B%n';
   // const commitFormat = 'commit=%HparentHashes=%PcommitDate=%cdcommiterName=%cnbody=%B';
@@ -97,6 +97,7 @@ export function getGitBranchCommitHistory(): BranchCommits {
     commits: []
   };
 
+  // TODO - is the following necessary to get them typed?
   branchCommits.commits = unTypedCommits.map( (unTypedCommit: any) => {
     const { author, commitDate, hash, message, parentHashes } = unTypedCommit;
     return {
