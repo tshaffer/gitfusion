@@ -1,5 +1,3 @@
-import { MapsLocalBar } from "material-ui/svg-icons";
-
 export interface LocalBranch {
   name: string,
   display: boolean,
@@ -30,26 +28,3 @@ export interface Commit {
 export interface BranchCommits {
   commits: Commit[];
 }
-
-
-
-
-
-
-
-
-
-// simple git interfaces
-export interface ListLogSummary {
-  all: ListLogLine[];
-  latest: ListLogLine;
-}
-
-export interface ListLogLine {
-  author_email: string;
-  author_name: string;
-  date: string;
-  hash: string;
-  message: string;
-}
-

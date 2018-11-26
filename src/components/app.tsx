@@ -16,9 +16,6 @@ import {
   cd,
   gitCheckout,
   gitStatus,
-  gitFetch,
-  gitLog,
-  gitBranch,
   shellInit,
   getLocalBranches,
   getBranchCommits,
@@ -52,14 +49,15 @@ const styles = {
 };
 
 import {
-  ListLogLine, CommitsByHash, CommitOnBranches, ListLogSummary,
-  LocalBranch,
-  LocalBranches,
   BranchCommits,
   Commit,
+  CommitOnBranches,
+  CommitsByHash, 
+  LocalBranch,
+  LocalBranches,
 } from '../gitInterfaces';
 
-let git: any = null;
+// TODO - add to state?
 let commitsByHash: CommitsByHash = {};
 
 interface AppState {
@@ -113,7 +111,6 @@ export default class App extends React.Component<any, object> {
         const status = gitStatus();
 
         const localBranches: LocalBranches = getLocalBranches();
-        console.log(localBranches);
 
         this.setState({
           repoPath,
@@ -132,11 +129,6 @@ export default class App extends React.Component<any, object> {
         commitOnBranches = commitsByHash[commit.hash];
         const branchNames = commitOnBranches.branchNames;
         branchNames.push(branchName);
-
-        // TODO - are the next two lines necessary, as the variables are 'by reference'?
-        // TODO - use cool es6 stuff. spread or object.assign
-        commitOnBranches.branchNames = branchNames;
-        commitsByHash[commit.hash] = commitOnBranches;
       }
       else {
         commitOnBranches = {
