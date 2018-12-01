@@ -21,6 +21,15 @@ import {
   getBranchCommits,
 } from '../gitInterface';
 
+import {
+  BranchCommits,
+  Commit,
+  CommitOnBranches,
+  CommitsByHash, 
+  LocalBranch,
+  LocalBranches,
+} from '../gitInterfaces';
+
 // https://v0.material-ui.com/#/
 // https://material-ui.com/api/list-item/
 // https://material-ui.com/customization/overrides/#overriding-with-classes
@@ -49,7 +58,7 @@ const styles = {
     display: 'block',
     width: '100%',
     height: '50%',
-    backgroundColor: '#475',
+    // backgroundColor: '#475',
     // overflow: 'scroll'
   },
   block: {
@@ -92,15 +101,6 @@ const styles = {
   }
 };
 
-import {
-  BranchCommits,
-  Commit,
-  CommitOnBranches,
-  CommitsByHash, 
-  LocalBranch,
-  LocalBranches,
-} from '../gitInterfaces';
-
 // TODO - add to state?
 let commitsByHash: CommitsByHash = {};
 
@@ -109,6 +109,7 @@ interface AppState {
   repoPath: string; // TODO - may not be required as a state variable
   localBranches: LocalBranches;
   sortedCommits: any[];
+  selectedCommit: CommitOnBranches;
 }
 
 export default class App extends React.Component<any, object> {
@@ -128,11 +129,13 @@ export default class App extends React.Component<any, object> {
         branches: [],
       },
       sortedCommits: [],
+      selectedCommit: null,
     };
 
     this.handleBrowse = this.handleBrowse.bind(this);
     this.handleSelectBranch = this.handleSelectBranch.bind(this);
     this.selectCommit = this.selectCommit.bind(this);
+    this.getSelectedCommitDetail = this.getSelectedCommitDetail.bind(this);
 
   }
 
@@ -279,6 +282,30 @@ export default class App extends React.Component<any, object> {
     console.log(this);
     console.log(commit);
     console.log(thisArg);
+    this.setState( {
+      selectedCommit: commit,
+    });
+  }
+
+  getSelectedCommitDetail(): any {
+    console.log(this);
+    console.log(this.state);
+
+    if (isNil(this.state.selectedCommit)) {
+      return null;
+    }
+
+    const commitData: Commit = this.state.selectedCommit.commitData;
+    const { author, commitDate, hash, message, parentHashes } = commitData;
+    return (
+      <div>
+        <p>{author}</p>
+        <p>{commitDate}</p>
+        <p>{message}</p>
+        <p>{hash}</p>
+        <p>{parentHashes}</p>
+      </div>
+    )
   }
 
   getCommitListItem(commit: CommitOnBranches, index: number) {
@@ -303,6 +330,7 @@ export default class App extends React.Component<any, object> {
       return this.getCommitListItem(commit, index);
     });
 
+    const commitDetail = this.getSelectedCommitDetail();
 
     return (
       <MuiThemeProvider>
@@ -326,7 +354,8 @@ export default class App extends React.Component<any, object> {
             </List>
           </div>
           <div style={styles.commitDetail}>
-            <p>Pizza</p>
+            <h3>Commit Detail</h3>
+            {commitDetail}
           </div>
         </div>
       </MuiThemeProvider>
