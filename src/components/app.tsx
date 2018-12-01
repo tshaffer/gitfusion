@@ -39,41 +39,35 @@ import {
 // document.body.style.height = '100%';
 
 const styles = {
+  rootDiv: {
+    width: '100%',
+    height: '100%'
+  },
   leftDiv: {
     width: '100px',
     height: '100%',
     float: 'left',
-    // backgroundColor: '#475'
+    backgroundColor: '#475'
   },
   rightDiv: {
-    marginLeft: '110px'
+    marginLeft: '110px',
+    height: '100%'
   },
-  topAbsolute: {
-    position: 'absolute',
-    right: '0',
-    width: '200px',
-    height: '100px'
-  },
-  bottomAbsolute: {
-    position: 'absolute',
-    right: '0',
-    width: '200px',
-    height: '100px'
-  },
-  topDiv: {
+  commitList: {
     display: 'block',
     width: '100%',
-    height: '50%',
+    height: '70%',
   },
   commitDetail: {
     display: 'block',
     width: '100%',
-    height: '50%',
+    height: '30%',
     // backgroundColor: '#475',
     // overflow: 'scroll'
   },
-  block: {
-    maxWidth: 250,
+  commitDetailItem: {
+    marginTop: '4px',
+    marginBottom: '0px',
   },
   lineStyle: {
     strokeWidth: '2',
@@ -310,11 +304,11 @@ export default class App extends React.Component<any, object> {
     const { author, commitDate, hash, message, parentHashes } = commitData;
     return (
       <div>
-        <p>{author}</p>
-        <p>{commitDate}</p>
-        <p>{message}</p>
-        <p>{hash}</p>
-        <p>{parentHashes}</p>
+        <p style={styles.commitDetailItem}>Commit author: {author}</p>
+        <p style={styles.commitDetailItem}>Commit date: {commitDate}</p>
+        <p style={styles.commitDetailItem}>Commit message: {message}</p>
+        <p style={styles.commitDetailItem}>Commit hash:{hash}</p>
+        <p style={styles.commitDetailItem}>Parent hashes: {parentHashes}</p>
       </div>
     )
   }
@@ -345,35 +339,35 @@ export default class App extends React.Component<any, object> {
 
     return (
       <MuiThemeProvider>
-        <div>
+        <div style={styles.rootDiv}>
           <div style={styles.leftDiv}>
             <svg height="400" width="100">
               <line x1="0" y1="0" x2="100" y2="400" style={styles.lineStyle} />
             </svg>
           </div>
           <div style={styles.rightDiv}>
-          <div>
-            <RaisedButton label='Browse' onClick={this.handleBrowse} />
-            <br />
-            <p style={styles.tightParagraph}>Repo: {this.state.repoName}</p>
-            <p style={styles.tightParagraph}>Location: {this.state.repoPath}</p>
-            <List style={styles.listStyle}>
-              <ListItem
-                primaryText="Local Branches"
-                initiallyOpen={true}
-                primaryTogglesNestedList={true}
-                nestedItems={localBranches}
-                style={styles.superListItem}>
-              </ListItem>
-            </List>
-            <List>
-              {commits}
-            </List>
-          </div>
-          <div style={styles.commitDetail}>
-            <h3>Commit Detail</h3>
-            {commitDetail}
-          </div>
+            <div style={styles.commitList}>
+              <RaisedButton label='Browse' onClick={this.handleBrowse} />
+              <br />
+              <p style={styles.tightParagraph}>Repo: {this.state.repoName}</p>
+              <p style={styles.tightParagraph}>Location: {this.state.repoPath}</p>
+              <List style={styles.listStyle}>
+                <ListItem
+                  primaryText="Local Branches"
+                  initiallyOpen={true}
+                  primaryTogglesNestedList={true}
+                  nestedItems={localBranches}
+                  style={styles.superListItem}>
+                </ListItem>
+              </List>
+              <List>
+                {commits}
+              </List>
+            </div>
+            <div style={styles.commitDetail}>
+              <h3>Commit Detail</h3>
+              {commitDetail}
+            </div>
           </div>
         </div>
       </MuiThemeProvider>
