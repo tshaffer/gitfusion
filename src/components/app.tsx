@@ -51,6 +51,10 @@ const styles = {
     fontSize: '13px',
     fontFamily: 'sans-serif'
   },
+  tightParagraph: {
+    marginTop: '4px',
+    marginBottom: '4px'
+  }
 };
 
 import {
@@ -96,8 +100,28 @@ export default class App extends React.Component<any, object> {
 
   }
 
-  handleBrowse = () => {
+  componentDidMount() {
+    this.onSelectRepo('/Users/tedshaffer/Documents/Projects/fb24-0/bacon');
+  }
 
+  onSelectRepo(repoPath: string) {
+    const repoName = path.basename(repoPath);
+
+    // TODO - check for error return
+    cd(repoPath);
+
+    const status = gitStatus();
+
+    const localBranches: LocalBranches = getLocalBranches();
+
+    this.setState({
+      repoPath,
+      repoName,
+      localBranches
+    });
+  }
+
+  handleBrowse = () => {
     const dialog: any = remote.dialog;
     dialog.showOpenDialog({
       defaultPath: '/Users/tedshaffer/Documents/Projects',
@@ -106,22 +130,7 @@ export default class App extends React.Component<any, object> {
       ]
     }, (selectedPaths: string[]) => {
       if (!isNil(selectedPaths) && selectedPaths.length === 1) {
-
-        const repoPath = selectedPaths[0];
-        const repoName = path.basename(repoPath);
-
-        // TODO - check for error return
-        cd(repoPath);
-
-        const status = gitStatus();
-
-        const localBranches: LocalBranches = getLocalBranches();
-
-        this.setState({
-          repoPath,
-          repoName,
-          localBranches
-        });
+        this.onSelectRepo(selectedPaths[0]);
       }
     });
   }
@@ -256,7 +265,8 @@ export default class App extends React.Component<any, object> {
           <div>
             <RaisedButton label='Browse' onClick={this.handleBrowse} />
             <br />
-            <p>Repo: <span style={styles.labelStyle}>{this.state.repoName}</span></p>
+            <p style={styles.tightParagraph}>Repo: <span style={styles.tightParagraph}>{this.state.repoName}</span></p>
+            <p style={styles.tightParagraph}>Location: <span style={styles.tightParagraph}>{this.state.repoPath}</span></p>
             <List>
               <ListItem
                 primaryText="Local Branches"
