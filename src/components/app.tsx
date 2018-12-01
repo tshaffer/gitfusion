@@ -30,6 +30,8 @@ import {
   LocalBranches,
 } from '../gitInterfaces';
 
+// “width: 100px; float:left;”
+
 // https://v0.material-ui.com/#/
 // https://material-ui.com/api/list-item/
 // https://material-ui.com/customization/overrides/#overriding-with-classes
@@ -37,6 +39,15 @@ import {
 // document.body.style.height = '100%';
 
 const styles = {
+  leftDiv: {
+    width: '100px',
+    height: '100%',
+    float: 'left',
+    // backgroundColor: '#475'
+  },
+  rightDiv: {
+    marginLeft: '110px'
+  },
   topAbsolute: {
     position: 'absolute',
     right: '0',
@@ -335,6 +346,12 @@ export default class App extends React.Component<any, object> {
     return (
       <MuiThemeProvider>
         <div>
+          <div style={styles.leftDiv}>
+            <svg height="400" width="100">
+              <line x1="0" y1="0" x2="100" y2="400" style={styles.lineStyle} />
+            </svg>
+          </div>
+          <div style={styles.rightDiv}>
           <div>
             <RaisedButton label='Browse' onClick={this.handleBrowse} />
             <br />
@@ -356,6 +373,7 @@ export default class App extends React.Component<any, object> {
           <div style={styles.commitDetail}>
             <h3>Commit Detail</h3>
             {commitDetail}
+          </div>
           </div>
         </div>
       </MuiThemeProvider>
