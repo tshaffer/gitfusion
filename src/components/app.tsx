@@ -21,11 +21,50 @@ import {
   getBranchCommits,
 } from '../gitInterface';
 
+// https://v0.material-ui.com/#/
+// https://material-ui.com/api/list-item/
+// https://material-ui.com/customization/overrides/#overriding-with-classes
+// https://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
+// document.body.style.height = '100%';
+
 const styles = {
+  topAbsolute: {
+    position: 'absolute',
+    right: '0',
+    width: '200px',
+    height: '100px'
+  },
+  bottomAbsolute: {
+    position: 'absolute',
+    right: '0',
+    width: '200px',
+    height: '100px'
+  },
+  topDiv: {
+    display: 'block',
+    width: '100%',
+    height: '50%',
+  },
+  commitDetail: {
+    display: 'block',
+    width: '100%',
+    height: '50%',
+    backgroundColor: '#475',
+    // overflow: 'scroll'
+  },
   block: {
     maxWidth: 250,
   },
+  lineStyle: {
+    strokeWidth: '2',
+    stroke: 'red'
+  },
+  superListItem: {
+    margin: '0px',
+    padding: '0px'
+  },
   checkbox: {
+    left: 2,
     marginBottom: 2,
     marginTop: 0,
     paddingBottom: 2,
@@ -34,17 +73,13 @@ const styles = {
   },
   listItem: {
     marginBottom: 4,
-    marginTop: 4,
+    marginTop: 6,
     paddingBottom: 4,
     paddingTop: 4,
-    paddingLeft: 42,
+    paddingLeft: 26,
   },
-  lineStyle: {
-    strokeWidth: '2',
-    stroke: 'red'
-  },
-  labelStyle: {
-    topMargin: '4px'
+  listStyle: {
+    padding: 0,
   },
   textSmall: {
     // fontStyle: 'italic',
@@ -97,6 +132,7 @@ export default class App extends React.Component<any, object> {
 
     this.handleBrowse = this.handleBrowse.bind(this);
     this.handleSelectBranch = this.handleSelectBranch.bind(this);
+    this.selectCommit = this.selectCommit.bind(this);
 
   }
 
@@ -239,12 +275,20 @@ export default class App extends React.Component<any, object> {
     );
   }
 
+  selectCommit(commit: CommitOnBranches, thisArg: any) {
+    console.log(this);
+    console.log(commit);
+    console.log(thisArg);
+  }
+
   getCommitListItem(commit: CommitOnBranches, index: number) {
     return (
       <ListItem
         key={index}
+        id={index.toString()}
         primaryText={commit.commitData.message}
         style={styles.listItem}
+        onClick={this.selectCommit.bind(this, commit)}
       />
     );
   }
@@ -259,26 +303,38 @@ export default class App extends React.Component<any, object> {
       return this.getCommitListItem(commit, index);
     });
 
+
     return (
       <MuiThemeProvider>
         <div>
           <div>
             <RaisedButton label='Browse' onClick={this.handleBrowse} />
             <br />
-            <p style={styles.tightParagraph}>Repo: <span style={styles.tightParagraph}>{this.state.repoName}</span></p>
-            <p style={styles.tightParagraph}>Location: <span style={styles.tightParagraph}>{this.state.repoPath}</span></p>
-            <List>
+            <p style={styles.tightParagraph}>Repo: {this.state.repoName}</p>
+            <p style={styles.tightParagraph}>Location: {this.state.repoPath}</p>
+            <List style={styles.listStyle}>
               <ListItem
                 primaryText="Local Branches"
                 initiallyOpen={true}
                 primaryTogglesNestedList={true}
-                nestedItems={localBranches}>
+                nestedItems={localBranches}
+                style={styles.superListItem}>
               </ListItem>
             </List>
             <List>
               {commits}
             </List>
           </div>
+          <div style={styles.commitDetail}>
+            <p>Pizza</p>
+          </div>
+        </div>
+      </MuiThemeProvider>
+    );
+  }
+}
+
+/* SVG stuff
           <div>
             <svg height="210" width="500">
               <line x1="0" y1="0" x2="200" y2="200" style={styles.lineStyle} />
@@ -298,8 +354,5 @@ export default class App extends React.Component<any, object> {
               </text>
             </svg>
           </div>
-        </div>
-      </MuiThemeProvider>
-    );
-  }
-}
+*/
+
