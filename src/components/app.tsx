@@ -25,7 +25,7 @@ import {
   BranchCommits,
   Commit,
   CommitOnBranches,
-  CommitsByHash, 
+  CommitsByHash,
   LocalBranch,
   LocalBranches,
 } from '../gitInterfaces';
@@ -68,6 +68,9 @@ const styles = {
   commitDetailItem: {
     marginTop: '4px',
     marginBottom: '0px',
+  },
+  commitLabel: {
+    width: '64px'
   },
   lineStyle: {
     strokeWidth: '2',
@@ -180,7 +183,7 @@ export default class App extends React.Component<any, object> {
   }
 
   mergeBranchCommits(branchName: string, branchCommits: BranchCommits) {
-    
+
     branchCommits.commits.forEach((commit: Commit) => {
       let commitOnBranches: CommitOnBranches;
       if (commitsByHash.hasOwnProperty(commit.hash)) {
@@ -204,7 +207,7 @@ export default class App extends React.Component<any, object> {
   }
 
   removeBranchCommits(branchName: string) {
-    Object.keys(commitsByHash).forEach( (commitHash: string) => {
+    Object.keys(commitsByHash).forEach((commitHash: string) => {
       if (commitsByHash.hasOwnProperty(commitHash)) {
         const commit: CommitOnBranches = commitsByHash[commitHash];
         const commitBranches: string[] = commit.branchNames;
@@ -287,9 +290,46 @@ export default class App extends React.Component<any, object> {
     console.log(this);
     console.log(commit);
     console.log(thisArg);
-    this.setState( {
+    this.setState({
       selectedCommit: commit,
     });
+  }
+
+  newGetSelectedCommitDetail(): any {
+
+    if (isNil(this.state.selectedCommit)) {
+      return null;
+    }
+
+    const commitData: Commit = this.state.selectedCommit.commitData;
+    const { author, commitDate, hash, message, parentHashes } = commitData;
+
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <td style={styles.commitLabel}>Author</td>
+            <td>{author}</td>
+          </tr>
+          <tr>
+            <td style={styles.commitLabel}>Date</td>
+            <td>{commitDate}</td>
+          </tr>
+          <tr>
+            <td style={styles.commitLabel}>Message</td>
+            <td>{message}</td>
+          </tr>
+          <tr>
+            <td style={styles.commitLabel}>Hash</td>
+            <td>{hash}</td>
+          </tr>
+          <tr>
+            <td style={styles.commitLabel}>Parents</td>
+            <td>{parentHashes}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
   }
 
   getSelectedCommitDetail(): any {
@@ -335,7 +375,7 @@ export default class App extends React.Component<any, object> {
       return this.getCommitListItem(commit, index);
     });
 
-    const commitDetail = this.getSelectedCommitDetail();
+    const commitDetail = this.newGetSelectedCommitDetail();
 
     return (
       <MuiThemeProvider>
