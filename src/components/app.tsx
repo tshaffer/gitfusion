@@ -175,10 +175,12 @@ export default class App extends React.Component<any, object> {
   }
 
   componentDidMount() {
-    this.onSelectRepo('/Users/tedshaffer/Documents/Projects/fb24-0/bacon');
+    const currentBranch: string = this.onSelectRepo('/Users/tedshaffer/Documents/Projects/fb24-0/bacon');
+    const branchCommits: BranchCommits = getBranchCommits();
+    this.mergeBranchCommits(currentBranch, branchCommits);
   }
 
-  onSelectRepo(repoPath: string) {
+  onSelectRepo(repoPath: string): string {
     const repoName = path.basename(repoPath);
 
     // TODO - check for error return
@@ -195,6 +197,8 @@ export default class App extends React.Component<any, object> {
       currentBranch,
       localBranches
     });
+
+    return currentBranch;
   }
 
   handleBrowse = () => {
