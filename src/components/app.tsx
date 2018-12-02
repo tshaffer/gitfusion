@@ -84,7 +84,7 @@ const styles = {
   commitLabel: {
     width: '64px'
   },
-  lineStyle: {
+  svgLineStyle: {
     strokeWidth: '2',
     stroke: 'red'
   },
@@ -110,14 +110,20 @@ const styles = {
   listStyle: {
     padding: 0,
   },
-  textSmall: {
+  tightParagraph: {
+    marginTop: '4px',
+    marginBottom: '4px'
+  },
+  svgTextSmall: {
     // fontStyle: 'italic',
     fontSize: '13px',
     fontFamily: 'sans-serif'
   },
-  tightParagraph: {
-    marginTop: '4px',
-    marginBottom: '4px'
+  svgCircle: {
+    r: 5,
+    stroke: 'black',
+    strokeWidth: '3',
+    fill: 'red'
   }
 };
 
@@ -168,7 +174,6 @@ export default class App extends React.Component<any, object> {
 
     // TODO - check for error return
     cd(repoPath);
-
     const status = gitStatus();
 
     const localBranches: LocalBranches = getLocalBranches();
@@ -389,6 +394,18 @@ getListItem(localBranch: LocalBranch, index: number) {
     );
   }
 
+  getCommitsGraph(): any {
+    const currentBranchX = 80;
+    let commitStartingY = 364;
+    const commitYDelta = 23;
+
+    return this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
+      return (
+        <circle cx={currentBranchX} cy={commitStartingY + index * commitYDelta} r="5px" style={styles.svgCircle} />
+      );
+    });
+  }
+
   render() {
 
     const statusSummary: any = this.getStatusSummary();
@@ -398,30 +415,31 @@ getListItem(localBranch: LocalBranch, index: number) {
     });
 
     const commits = this.getCommits();
+    const commitsGraph = this.getCommitsGraph();
     const commitDetail = this.getSelectedCommitDetail();
 
     return (
       <MuiThemeProvider>
         <div style={styles.rootDiv}>
           <div style={styles.leftDiv}>
-            <svg height="400" width="100">
-              <line x1="0" y1="0" x2="100" y2="400" style={styles.lineStyle} />
+            <svg height="700" width="100">
+              {commitsGraph}
             </svg>
           </div>
           <div style={styles.rightDiv}>
             <div style={styles.commitList}>
-              <RaisedButton label='Browse' onClick={this.handleBrowse} />
-              <br />
-              {statusSummary}
+              <RaisedButton label='Select Repo' onClick={this.handleBrowse} />
               <List style={styles.listStyle}>
                 <ListItem
-                  primaryText="Local Branches"
+                  primaryText="Select Local Branches"
                   initiallyOpen={true}
                   primaryTogglesNestedList={true}
                   nestedItems={localBranches}
                   style={styles.superListItem}>
                 </ListItem>
               </List>
+              {statusSummary}
+              <h3>Commits</h3>
               {commits}
             </div>
             <div style={styles.commitDetail}>
@@ -434,26 +452,3 @@ getListItem(localBranch: LocalBranch, index: number) {
     );
   }
 }
-
-/* SVG stuff
-          <div>
-            <svg height="210" width="500">
-              <line x1="0" y1="0" x2="200" y2="200" style={styles.lineStyle} />
-              <text
-                style={styles.textSmall}
-                x="50" 
-                y="55"
-              >
-                Example Text 0
-              </text>
-              <text
-                style={styles.textSmall}
-                x="50" 
-                y="75"
-              >
-                Example Text 1
-              </text>
-            </svg>
-          </div>
-*/
-
