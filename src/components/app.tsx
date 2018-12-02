@@ -394,16 +394,31 @@ getListItem(localBranch: LocalBranch, index: number) {
     );
   }
 
+  getCommitLine(x: number, startY: number, lineLength: number): any {
+    return (
+      <line x1={x} y1={startY} x2={x} y2={startY + lineLength} style={styles.svgLineStyle} />
+    );
+  }
+
   getCommitsGraph(): any {
     const currentBranchX = 80;
     let commitStartingY = 364;
     const commitYDelta = 23;
 
-    return this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
+    const commitsIndicators = this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
       return (
         <circle cx={currentBranchX} cy={commitStartingY + index * commitYDelta} r="5px" style={styles.svgCircle} />
       );
     });
+
+    const commitLines: any = [];
+    for (let i = 0; i < this.state.sortedCommits.length - 1; i++) {
+      commitLines.push(this.getCommitLine(currentBranchX, commitStartingY + i * commitYDelta, 23));
+    }
+
+    const commitGraphics: any = commitLines.concat(commitsIndicators);
+    
+    return commitGraphics;
   }
 
   render() {
