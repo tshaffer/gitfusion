@@ -97,7 +97,7 @@ export function getBranchCommits(): BranchCommits {
     const { author, commitDate, hash, message, parentHashes } = unTypedCommit;
     return {
       author,
-      commitDate,
+      commitDate: new Date(commitDate),
       hash,
       message,
       parentHashes,

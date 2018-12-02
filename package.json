@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "core-js": "^2.4.1",
+    "dateformat": "^3.0.3",
     "form-data": "^2.2.0",
     "fs-extra": "^4.0.2",
     "isomorphic-fetch": "^2.2.1",
@@ -26,6 +27,7 @@
     "tsutils": "^2.1.0"
   },
   "devDependencies": {
+    "@types/dateformat": "^1.0.1",
     "@types/electron": "^1.4.37",
     "@types/form-data": "^2.2.0",
     "@types/fs-extra": "^4.0.2",

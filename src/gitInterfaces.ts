@@ -14,7 +14,7 @@ export interface CommitOnBranches {
 
 export interface Commit {
   author: string;
-  commitDate: string;
+  commitDate: Date;
   hash: string;
   message: string;
   parentHashes: string;

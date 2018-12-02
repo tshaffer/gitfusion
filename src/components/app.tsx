@@ -4,6 +4,8 @@ import {
 
 import { isNil } from 'lodash';
 
+import * as dateformat from 'dateformat';
+
 import * as React from 'react';
 import * as path from "path";
 
@@ -68,6 +70,9 @@ const styles = {
   },
   commitAuthor: {
     width: '200px'
+  },
+  commitDate: {
+    width: '300px',
   },
   commitDetail: {
     display: 'block',
@@ -283,9 +288,7 @@ export default class App extends React.Component<any, object> {
     });
 
     sortedCommits.sort((a, b) => {
-      const aDate: Date = new Date(a.commitData.commitDate);
-      const bDate: Date = new Date(b.commitData.commitDate);
-      return bDate.valueOf() - aDate.valueOf();
+      return b.commitData.commitDate.valueOf() - a.commitData.commitDate.valueOf();
     });
 
     console.log(sortedCommits);
@@ -348,6 +351,7 @@ getListItem(localBranch: LocalBranch, index: number) {
         onClick={this.handleSelectCommit.bind(this, commit)}>
         <td style={styles.commitMessage}>{commit.commitData.message}</td>
         <td style={styles.commitAuthor}>{commit.commitData.author}</td>
+        <td style={styles.commitDate}>{dateformat(commit.commitData.commitDate, 'shortDate')}</td>
       </tr>
     );
   }
@@ -373,6 +377,7 @@ getListItem(localBranch: LocalBranch, index: number) {
 
     const commitData: Commit = this.state.selectedCommit.commitData;
     const { author, commitDate, hash, message, parentHashes } = commitData;
+    const formattedDate = dateformat(commitDate, 'm/d/yy "at" hh:MM tt');
 
     return (
       <table>
@@ -383,7 +388,7 @@ getListItem(localBranch: LocalBranch, index: number) {
           </tr>
           <tr>
             <td style={styles.commitLabel}>Date</td>
-            <td>{commitDate}</td>
+            <td>{formattedDate}</td>
           </tr>
           <tr>
             <td style={styles.commitLabel}>Message</td>
