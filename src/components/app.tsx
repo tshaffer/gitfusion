@@ -27,7 +27,6 @@ import {
   CommitOnBranches,
   CommitsByHash,
   LocalBranch,
-  LocalBranches,
 } from '../gitInterfaces';
 
 // “width: 100px; float:left;”
@@ -119,11 +118,17 @@ const styles = {
     fontSize: '13px',
     fontFamily: 'sans-serif'
   },
+  svgSelectedBranchColor: {
+    fill: 'red'
+  },
+  svgUnselectedBranchColor: {
+    fill: 'gray'
+  },
   svgCircle: {
     r: 5,
     stroke: 'black',
     strokeWidth: '3',
-    fill: 'red'
+    // fill: 'red'
   }
 };
 
@@ -133,7 +138,8 @@ let commitsByHash: CommitsByHash = {};
 interface AppState {
   repoName: string;
   repoPath: string; // TODO - may not be required as a state variable
-  localBranches: LocalBranches;
+  currentBranch: string;
+  localBranches: LocalBranch[];
   sortedCommits: any[];
   selectedCommit: CommitOnBranches;
 }
@@ -150,10 +156,8 @@ export default class App extends React.Component<any, object> {
     this.state = {
       repoName: '',
       repoPath: '',
-      localBranches: {
-        currentBranch: null,
-        branches: [],
-      },
+      currentBranch: '',
+      localBranches: [],
       sortedCommits: [],
       selectedCommit: null,
     };
@@ -175,12 +179,15 @@ export default class App extends React.Component<any, object> {
     // TODO - check for error return
     cd(repoPath);
     const status = gitStatus();
+    const tmp = status.split('On branch ');
+    const currentBranch = tmp[1].split('\n')[0];
 
-    const localBranches: LocalBranches = getLocalBranches();
+    const localBranches: LocalBranch[] = getLocalBranches();
 
     this.setState({
       repoPath,
       repoName,
+      currentBranch,
       localBranches
     });
   }
@@ -249,8 +256,8 @@ export default class App extends React.Component<any, object> {
 
     const index: number = Number(event.target.id);
 
-    const localBranches: LocalBranches = this.state.localBranches;
-    const selectedBranch: LocalBranch = localBranches.branches[index];
+    const localBranches: LocalBranch[] = this.state.localBranches;
+    const selectedBranch: LocalBranch = localBranches[index];
     selectedBranch.display = !selectedBranch.display;
 
     const branchName = selectedBranch.name;
@@ -259,6 +266,7 @@ export default class App extends React.Component<any, object> {
       gitCheckout(branchName);
       const branchCommits: BranchCommits = getBranchCommits();
       this.mergeBranchCommits(branchName, branchCommits);
+      gitCheckout(this.state.currentBranch);
     }
     else {
       this.removeBranchCommits(branchName);
@@ -294,7 +302,7 @@ export default class App extends React.Component<any, object> {
  getStatusSummary() {
 
   const currentBranchName: string = 
-    isNil(this.state.localBranches.currentBranch) ? '' : this.state.localBranches.currentBranch.name;
+    isNil(this.state.currentBranch) ? '' : this.state.currentBranch;
 
   return (
     <table>
@@ -394,29 +402,108 @@ getListItem(localBranch: LocalBranch, index: number) {
     );
   }
 
-  getCommitLine(x: number, startY: number, lineLength: number): any {
+  getCommitLine(x1: number, y1: number, x2: number, y2: number): any {
     return (
-      <line x1={x} y1={startY} x2={x} y2={startY + lineLength} style={styles.svgLineStyle} />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} style={styles.svgLineStyle} />
     );
   }
 
-  getCommitsGraph(): any {
+  // xCoordinateByBranch
+
+  getBranchNamesKey(branchNames: string[]): string {
+    let branchNamesKey = '';
+    branchNames.forEach((branchName) => {
+      branchNamesKey = branchNamesKey + ':' + branchName;
+    })
+    return branchNamesKey;
+  }
+
+  getCommitIndicator(x: number, y: number, commitIndicatorStyle: any) {
+    const circleStyle: any = Object.assign( {}, styles.svgCircle, commitIndicatorStyle);
+    return (
+      <circle cx={x} cy={y} r="5px" style={circleStyle} />
+    );
+  }
+
+  getCommitsGraph(): any[] {
+
     const currentBranchX = 80;
-    let commitStartingY = 364;
+    let lastBranchX = currentBranchX;
+    const branchXDelta = 24;
+
+    const commitStartingY = 364;
+    let yCoordinate = commitStartingY; 
     const commitYDelta = 23;
 
-    const commitsIndicators = this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
-      return (
-        <circle cx={currentBranchX} cy={commitStartingY + index * commitYDelta} r="5px" style={styles.svgCircle} />
-      );
-    });
-
-    const commitLines: any = [];
-    for (let i = 0; i < this.state.sortedCommits.length - 1; i++) {
-      commitLines.push(this.getCommitLine(currentBranchX, commitStartingY + i * commitYDelta, 23));
+    if (isNil(this.state.currentBranch)) {
+      return [];
     }
 
-    const commitGraphics: any = commitLines.concat(commitsIndicators);
+    const currentBranchName = this.state.currentBranch;
+
+    const xCoordinateByBranchName: any = {};
+
+    const currentBranchStyle = styles.svgSelectedBranchColor;
+    const nonCurrentBranchStyle = styles.svgUnselectedBranchColor;
+    let commitIndicatorStyle: any;
+
+    let xCoordinate: number;
+    const commitDataByHash: any = {};
+
+    this.state.sortedCommits.map( (commit: CommitOnBranches, index: number) => {
+      const branchNames = commit.branchNames;
+      const i = branchNames.indexOf(currentBranchName);
+      if (i >= 0 && branchNames[i] === currentBranchName) {
+        xCoordinate = currentBranchX;
+        commitIndicatorStyle = currentBranchStyle;
+      }
+      else {
+        const branchNamesKey = this.getBranchNamesKey(branchNames);
+        if (!xCoordinateByBranchName.hasOwnProperty(branchNamesKey)) {
+          lastBranchX -= branchXDelta;
+          xCoordinateByBranchName[branchNamesKey] = lastBranchX;
+        }
+        xCoordinate = xCoordinateByBranchName[branchNamesKey];
+        commitIndicatorStyle = nonCurrentBranchStyle;
+      }
+      commitDataByHash[commit.commitData.hash] = {
+        xCoordinate,
+        yCoordinate,
+        commitIndicatorStyle,
+      }
+      yCoordinate += commitYDelta;
+    });
+
+    console.log(commitDataByHash);
+
+    let commitIndicators: any[] = [];
+    let commitLines: any[] = [];
+    for (const hash in commitDataByHash) { 
+      if (commitDataByHash.hasOwnProperty(hash)) {
+        const commitData: any = commitDataByHash[hash];
+        const { xCoordinate, yCoordinate, commitIndicatorStyle } = commitData;
+        commitIndicators.push(this.getCommitIndicator(xCoordinate, yCoordinate, commitIndicatorStyle));
+
+        // draw lines from commit to parent(s)
+        const commits: CommitOnBranches = commitsByHash[hash];
+        const detailedCommitData: Commit = commits.commitData;
+        console.log(detailedCommitData.parentHashes);
+        const parentHashes: string[] = detailedCommitData.parentHashes.split(' ');
+        parentHashes.forEach( (parentHash) => {
+          const parentCommitData = commitDataByHash[parentHash];
+          if (!isNil(parentCommitData)) {
+            commitLines.push(this.getCommitLine(
+              xCoordinate, 
+              yCoordinate,
+              parentCommitData.xCoordinate, 
+              parentCommitData.yCoordinate,
+            ));
+          }
+        });
+      }
+    }
+
+    const commitGraphics: any = commitLines.concat(commitIndicators);
     
     return commitGraphics;
   }
@@ -425,7 +512,7 @@ getListItem(localBranch: LocalBranch, index: number) {
 
     const statusSummary: any = this.getStatusSummary();
 
-    const localBranches = this.state.localBranches.branches.map((localBranch: any, index: number) => {
+    const localBranches = this.state.localBranches.map((localBranch: any, index: number) => {
       return this.getListItem(localBranch, index);
     });
 

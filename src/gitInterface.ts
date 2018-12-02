@@ -4,7 +4,6 @@ import {
   BranchCommits,
   Commit,
   LocalBranch,
-  LocalBranches,
 } from './gitInterfaces';
 
 export function shellInit() {
@@ -36,14 +35,11 @@ export function gitBranch(options: string): string {
   return results.stdout;
 }
 
-export function getLocalBranches(): LocalBranches {
+export function getLocalBranches(): LocalBranch[] {
 
   const branchResults = gitBranch('');
 
-  const localBranches: LocalBranches = {
-    branches: [],
-    currentBranch: null
-  };
+  const localBranches: LocalBranch[] = [];
 
   const branchResultEntities: string[] = branchResults.split('\n');
   branchResultEntities.forEach( (branchResultEntity: string) => {
@@ -53,8 +49,7 @@ export function getLocalBranches(): LocalBranches {
         name: branchResultEntity.substring(2),
         display: true,
       }
-      localBranches.currentBranch = localBranch;
-      localBranches.branches.push(localBranch);
+      localBranches.push(localBranch);
     }
     else {
       const trimmedBranchName = branchResultEntity.trim();
@@ -63,7 +58,7 @@ export function getLocalBranches(): LocalBranches {
           name: trimmedBranchName,
           display: false,
         }
-        localBranches.branches.push(localBranch);
+        localBranches.push(localBranch);
       }
     }
   });

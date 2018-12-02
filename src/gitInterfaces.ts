@@ -3,11 +3,6 @@ export interface LocalBranch {
   display: boolean,
 }
 
-export interface LocalBranches {
-  currentBranch: LocalBranch;
-  branches: LocalBranch[];
-}
-
 export interface CommitsByHash {
   [hash: string] : CommitOnBranches
 };
