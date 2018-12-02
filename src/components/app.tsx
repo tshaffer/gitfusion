@@ -58,6 +58,18 @@ const styles = {
     width: '100%',
     height: '70%',
   },
+  summaryType: {
+    width: '128px'
+  },
+  summaryValue: {
+    width: '900px'
+  },
+  commitMessage: {
+    width: '800px'
+  },
+  commitAuthor: {
+    width: '200px'
+  },
   commitDetail: {
     display: 'block',
     width: '100%',
@@ -142,7 +154,7 @@ export default class App extends React.Component<any, object> {
 
     this.handleBrowse = this.handleBrowse.bind(this);
     this.handleSelectBranch = this.handleSelectBranch.bind(this);
-    this.selectCommit = this.selectCommit.bind(this);
+    this.handleSelectCommit = this.handleSelectCommit.bind(this);
     this.getSelectedCommitDetail = this.getSelectedCommitDetail.bind(this);
 
   }
@@ -200,7 +212,7 @@ export default class App extends React.Component<any, object> {
       }
     });
 
-    const sortedCommits = this.resortCommits();
+    const sortedCommits = this.reSortCommits();
     this.setState({
       sortedCommits
     });
@@ -222,7 +234,7 @@ export default class App extends React.Component<any, object> {
       }
     });
 
-    const sortedCommits: CommitOnBranches[] = this.resortCommits();
+    const sortedCommits: CommitOnBranches[] = this.reSortCommits();
     this.setState({
       sortedCommits,
     });
@@ -250,7 +262,7 @@ export default class App extends React.Component<any, object> {
 
   // sort commits in preparation for render
   // for now, assume that we want to display everything in commitsByHash
-  resortCommits(): CommitOnBranches[] {
+  reSortCommits(): CommitOnBranches[] {
 
     const hashes: string[] = Object.keys(commitsByHash);
     const sortedCommits: CommitOnBranches[] = hashes.map((hash) => {
@@ -268,7 +280,38 @@ export default class App extends React.Component<any, object> {
     return sortedCommits;
   }
 
-  getListItem(localBranch: LocalBranch, index: number) {
+  handleSelectCommit(commit: CommitOnBranches, thisArg: any) {
+    this.setState({
+      selectedCommit: commit,
+    });
+  }
+
+ getStatusSummary() {
+
+  const currentBranchName: string = 
+    isNil(this.state.localBranches.currentBranch) ? '' : this.state.localBranches.currentBranch.name;
+
+  return (
+    <table>
+      <tbody>
+        <tr style={styles.tightParagraph}>
+          <td style={styles.summaryType}>Repo:</td>
+          <td style={styles.summaryValue}>{this.state.repoName}</td>
+        </tr>
+        <tr style={styles.tightParagraph}>
+          <td style={styles.summaryType}>Location:</td>
+          <td style={styles.summaryValue}>{this.state.repoPath}</td>
+        </tr>
+        <tr style={styles.tightParagraph}>
+          <td style={styles.summaryType}>Current branch:</td>
+          <td style={styles.summaryValue}>{currentBranchName}</td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
+
+getListItem(localBranch: LocalBranch, index: number) {
     return (
       <ListItem
         key={index}
@@ -286,16 +329,30 @@ export default class App extends React.Component<any, object> {
     );
   }
 
-  selectCommit(commit: CommitOnBranches, thisArg: any) {
-    console.log(this);
-    console.log(commit);
-    console.log(thisArg);
-    this.setState({
-      selectedCommit: commit,
-    });
+  getCommitSummaryRow(commit: CommitOnBranches, index: number) {
+    return (
+      <tr
+        onClick={this.handleSelectCommit.bind(this, commit)}>
+        <td style={styles.commitMessage}>{commit.commitData.message}</td>
+        <td style={styles.commitAuthor}>{commit.commitData.author}</td>
+      </tr>
+    );
   }
 
-  newGetSelectedCommitDetail(): any {
+  getCommits(): any {
+
+    const commitRows = this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
+      return this.getCommitSummaryRow(commit, index);
+    });
+
+    return (
+      <table>
+        <tbody>{commitRows}</tbody>
+      </table>
+    );
+  }
+
+  getSelectedCommitDetail(): any {
 
     if (isNil(this.state.selectedCommit)) {
       return null;
@@ -332,50 +389,16 @@ export default class App extends React.Component<any, object> {
     );
   }
 
-  getSelectedCommitDetail(): any {
-    console.log(this);
-    console.log(this.state);
-
-    if (isNil(this.state.selectedCommit)) {
-      return null;
-    }
-
-    const commitData: Commit = this.state.selectedCommit.commitData;
-    const { author, commitDate, hash, message, parentHashes } = commitData;
-    return (
-      <div>
-        <p style={styles.commitDetailItem}>Commit author: {author}</p>
-        <p style={styles.commitDetailItem}>Commit date: {commitDate}</p>
-        <p style={styles.commitDetailItem}>Commit message: {message}</p>
-        <p style={styles.commitDetailItem}>Commit hash:{hash}</p>
-        <p style={styles.commitDetailItem}>Parent hashes: {parentHashes}</p>
-      </div>
-    )
-  }
-
-  getCommitListItem(commit: CommitOnBranches, index: number) {
-    return (
-      <ListItem
-        key={index}
-        id={index.toString()}
-        primaryText={commit.commitData.message}
-        style={styles.listItem}
-        onClick={this.selectCommit.bind(this, commit)}
-      />
-    );
-  }
-
   render() {
+
+    const statusSummary: any = this.getStatusSummary();
 
     const localBranches = this.state.localBranches.branches.map((localBranch: any, index: number) => {
       return this.getListItem(localBranch, index);
     });
 
-    const commits = this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
-      return this.getCommitListItem(commit, index);
-    });
-
-    const commitDetail = this.newGetSelectedCommitDetail();
+    const commits = this.getCommits();
+    const commitDetail = this.getSelectedCommitDetail();
 
     return (
       <MuiThemeProvider>
@@ -389,8 +412,7 @@ export default class App extends React.Component<any, object> {
             <div style={styles.commitList}>
               <RaisedButton label='Browse' onClick={this.handleBrowse} />
               <br />
-              <p style={styles.tightParagraph}>Repo: {this.state.repoName}</p>
-              <p style={styles.tightParagraph}>Location: {this.state.repoPath}</p>
+              {statusSummary}
               <List style={styles.listStyle}>
                 <ListItem
                   primaryText="Local Branches"
@@ -400,9 +422,7 @@ export default class App extends React.Component<any, object> {
                   style={styles.superListItem}>
                 </ListItem>
               </List>
-              <List>
-                {commits}
-              </List>
+              {commits}
             </div>
             <div style={styles.commitDetail}>
               <h3>Commit Detail</h3>
