@@ -440,7 +440,7 @@ export default class App extends React.Component<any, object> {
     let lastBranchX = currentBranchX;
     const branchXDelta = 24;
 
-    const commitStartingY = 364;
+    const commitStartingY = 70;
     let yCoordinate = commitStartingY;
     const commitYDelta = 23;
 
@@ -532,27 +532,31 @@ export default class App extends React.Component<any, object> {
     return (
       <MuiThemeProvider>
         <div style={styles.rootDiv}>
-          <div style={styles.leftDiv}>
-            <svg height="700" width="100">
-              {commitsGraph}
-            </svg>
+          <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '20%'}}>
+            <RaisedButton label='Select Repo' onClick={this.handleBrowse} />
+            {statusSummary}
+            <List style={styles.listStyle}>
+              <ListItem
+                primaryText="Select Local Branches"
+                initiallyOpen={false}
+                primaryTogglesNestedList={true}
+                nestedItems={localBranches}
+                style={styles.superListItem}>
+              </ListItem>
+            </List>
           </div>
-          <div style={styles.rightDiv}>
-            <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '70%'}}>
-              <RaisedButton label='Select Repo' onClick={this.handleBrowse} />
-              <List style={styles.listStyle}>
-                <ListItem
-                  primaryText="Select Local Branches"
-                  initiallyOpen={true}
-                  primaryTogglesNestedList={true}
-                  nestedItems={localBranches}
-                  style={styles.superListItem}>
-                </ListItem>
-              </List>
-              {statusSummary}
+          <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '50%'}}>
+            <div style={styles.leftDiv}>
+              <svg height="700" width="100">
+                {commitsGraph}
+              </svg>
+            </div>
+            <div style={styles.rightDiv}>
               <h3>Commits</h3>
               {commits}
             </div>
+          </div>
+          <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '30%'}}>
             <div style={styles.commitDetail}>
               <h3>Commit Detail</h3>
               {commitDetail}
