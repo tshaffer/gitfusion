@@ -48,7 +48,7 @@ const styles = {
     width: '100px',
     height: '100%',
     float: 'left',
-    backgroundColor: '#475'
+    // backgroundColor: '#475'
   },
   rightDiv: {
     marginLeft: '110px',
@@ -428,9 +428,9 @@ export default class App extends React.Component<any, object> {
     let lastBranchX = currentBranchX;
     const branchXDelta = 24;
 
-    const commitStartingY = 70;
+    const commitStartingY = 71;
     let yCoordinate = commitStartingY;
-    const commitYDelta = 23;
+    const commitYDelta = 22;
 
     if (isNil(this.state.currentBranch)) {
       return [];
