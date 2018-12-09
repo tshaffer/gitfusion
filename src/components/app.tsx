@@ -531,11 +531,6 @@ export default class App extends React.Component<any, object> {
 
   getBranchSelectorDialog() {
     if (this.state.selectBranchesDialogOpen) {
-
-      // const localBranches = this.state.localBranches.map((localBranch: any, index: number) => {
-      //   return this.getListItem(localBranch, index);
-      // });
-  
       return (
         <BranchSelectorDialog
           branches={this.state.localBranches}

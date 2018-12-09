@@ -23,26 +23,60 @@ export interface BranchSelectorFormProps {
   // onUpdateStopPlayback: (id: string, stopPlayback: boolean) => (dispatch: Function) => void;
 }
 
-export default class BranchSelectorDialog extends React.Component<BranchSelectorFormProps> {
-  state = {
-    open: true,
-  };
+interface DialogState {
+  open: boolean;
+  branches: LocalBranch[];
+}
 
-  handleOpen = () => {
-    this.setState({open: true});
-  };
+export default class BranchSelectorDialog extends React.Component<BranchSelectorFormProps> {
+
+  state: DialogState;
+
+  constructor(props: any) {
+    super(props);
+
+    this.state = {
+      open: true,
+      branches: [],
+    };
+
+    // this.handleSelectRepo = this.handleSelectRepo.bind(this);
+  }
+
+  componentDidMount() {
+    const branches = this.props.branches.map( (branch: LocalBranch) => {
+      return {
+        name: branch.name,
+        display: branch.display,
+      }
+    });
+    this.setState( {
+      branches,
+    })
+  }
 
   handleClose = () => {
     this.setState({open: false});
   };
 
+  handleToggleDisplayBranch(branchIndex: number, thisArg: any) {
+    const branches = this.state.branches;
+    branches[branchIndex].display = !branches[branchIndex].display;
+    this.setState( {
+      branches,
+    });
+  }
+
   getCheckboxes() {
-    const checkBoxes: any = this.props.branches.map( (branch: LocalBranch, index) => {
+    const checkBoxes: any = this.state.branches.map( (branch: LocalBranch, branchIndex) => {
+      const displayBranch = this.state.branches[branchIndex].display;
       return (
         <Checkbox
-          key={index}
+          key={branchIndex}
           label={branch.name}
           style={styles.checkbox}
+          checked={displayBranch}
+          onCheck={this.handleToggleDisplayBranch.bind(this, branchIndex)}
         />
       )
     });
