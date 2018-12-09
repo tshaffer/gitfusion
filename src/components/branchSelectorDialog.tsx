@@ -1,19 +1,29 @@
 import * as React from 'react';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import RaisedButton from 'material-ui/RaisedButton';
-import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
+import Checkbox from 'material-ui/Checkbox';
+
+import {
+  LocalBranch,
+} from '../gitInterfaces';
+
 
 const styles = {
-  radioButton: {
-    marginTop: 16,
+  block: {
+    maxWidth: 250,
+  },
+  checkbox: {
+    marginBottom: 16,
   },
 };
 
-/**
- * Dialog content can be scrollable.
- */
-export default class BranchSelectorDialog extends React.Component {
+export interface BranchSelectorFormProps {
+  branches: LocalBranch[];
+  // stopPlayback: boolean;
+  // onUpdateStopPlayback: (id: string, stopPlayback: boolean) => (dispatch: Function) => void;
+}
+
+export default class BranchSelectorDialog extends React.Component<BranchSelectorFormProps> {
   state = {
     open: true,
   };
@@ -26,7 +36,29 @@ export default class BranchSelectorDialog extends React.Component {
     this.setState({open: false});
   };
 
+  getCheckboxes() {
+    const checkBoxes: any = this.props.branches.map( (branch: LocalBranch, index) => {
+      return (
+        <Checkbox
+          key={index}
+          label={branch.name}
+          style={styles.checkbox}
+        />
+      )
+    });
+
+    if (checkBoxes.length > 0) {
+      return checkBoxes;
+    }
+    else {
+      return null;
+    }
+  }
+
   render() {
+
+    const branchCheckboxes = this.getCheckboxes();
+
     const actions = [
       <FlatButton
         label="Cancel"
@@ -41,33 +73,17 @@ export default class BranchSelectorDialog extends React.Component {
       />,
     ];
 
-    const radios = [];
-    for (let i = 0; i < 30; i++) {
-      radios.push(
-        <RadioButton
-          key={i}
-          value={`value${i + 1}`}
-          label={`Option ${i + 1}`}
-          style={styles.radioButton}
-        />
-      );
-    }
-
-    // <RaisedButton label="Scrollable Dialog" onClick={this.handleOpen} />
-
     return (
       <div>
         <Dialog
-          title="Scrollable Dialog"
+          title="Local Branches"
           actions={actions}
           modal={false}
           open={this.state.open}
           onRequestClose={this.handleClose}
           autoScrollBodyContent={true}
         >
-          <RadioButtonGroup name="shipSpeed" defaultSelected="not_light">
-            {radios}
-          </RadioButtonGroup>
+          {branchCheckboxes}
         </Dialog>
       </div>
     );
