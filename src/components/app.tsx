@@ -178,6 +178,7 @@ export default class App extends React.Component<any, object> {
     this.handleSelectCommit = this.handleSelectCommit.bind(this);
     this.getSelectedCommitDetail = this.getSelectedCommitDetail.bind(this);
     this.handleSelectBranches = this.handleSelectBranches.bind(this);
+    this.onCloseBranchSelectorDialog = this.onCloseBranchSelectorDialog.bind(this);
   }
 
   componentDidMount() {
@@ -223,7 +224,7 @@ export default class App extends React.Component<any, object> {
 
   handleSelectBranches() {
     this.setState( {
-      selectBranchesDialogOpen: !this.state.selectBranchesDialogOpen,
+      selectBranchesDialogOpen: true,
     })
   }
 
@@ -292,6 +293,12 @@ export default class App extends React.Component<any, object> {
     else {
       this.removeBranchCommits(branchName);
     }
+  }
+
+  onCloseBranchSelectorDialog() {
+    this.setState( {
+      selectBranchesDialogOpen: false
+    });
   }
 
   // sort commits in preparation for render
@@ -534,6 +541,7 @@ export default class App extends React.Component<any, object> {
       return (
         <BranchSelectorDialog
           branches={this.state.localBranches}
+          onCloseDialog={this.onCloseBranchSelectorDialog}
         />
       )
     }

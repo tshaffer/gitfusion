@@ -19,12 +19,12 @@ const styles = {
 
 export interface BranchSelectorFormProps {
   branches: LocalBranch[];
+  onCloseDialog: () => void;
   // stopPlayback: boolean;
   // onUpdateStopPlayback: (id: string, stopPlayback: boolean) => (dispatch: Function) => void;
 }
 
 interface DialogState {
-  open: boolean;
   branches: LocalBranch[];
 }
 
@@ -36,7 +36,6 @@ export default class BranchSelectorDialog extends React.Component<BranchSelector
     super(props);
 
     this.state = {
-      open: true,
       branches: [],
     };
 
@@ -56,7 +55,7 @@ export default class BranchSelectorDialog extends React.Component<BranchSelector
   }
 
   handleClose = () => {
-    this.setState({open: false});
+    this.props.onCloseDialog();
   };
 
   handleToggleDisplayBranch(branchIndex: number, thisArg: any) {
@@ -113,7 +112,7 @@ export default class BranchSelectorDialog extends React.Component<BranchSelector
           title="Local Branches"
           actions={actions}
           modal={false}
-          open={this.state.open}
+          open={true}
           onRequestClose={this.handleClose}
           autoScrollBodyContent={true}
         >
