@@ -13,6 +13,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
 import { List, ListItem } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
+import BranchSelectorDialog from './branchSelectorDialog';
 
 import {
   cd,
@@ -53,6 +54,9 @@ const styles = {
   rightDiv: {
     marginLeft: '110px',
     height: '100%'
+  },
+  buttonSpacing: {
+    marginLeft: '16px',
   },
   commitList: {
     display: 'block',
@@ -147,6 +151,7 @@ interface AppState {
   localBranches: LocalBranch[];
   sortedCommits: any[];
   selectedCommit: CommitOnBranches;
+  selectBranchesDialogOpen: boolean;
 }
 
 export default class App extends React.Component<any, object> {
@@ -165,13 +170,14 @@ export default class App extends React.Component<any, object> {
       localBranches: [],
       sortedCommits: [],
       selectedCommit: null,
+      selectBranchesDialogOpen: false,
     };
 
-    this.handleBrowse = this.handleBrowse.bind(this);
+    this.handleSelectRepo = this.handleSelectRepo.bind(this);
     this.handleSelectBranch = this.handleSelectBranch.bind(this);
     this.handleSelectCommit = this.handleSelectCommit.bind(this);
     this.getSelectedCommitDetail = this.getSelectedCommitDetail.bind(this);
-
+    this.handleSelectBranches = this.handleSelectBranches.bind(this);
   }
 
   componentDidMount() {
@@ -201,7 +207,7 @@ export default class App extends React.Component<any, object> {
     return currentBranch;
   }
 
-  handleBrowse = () => {
+  handleSelectRepo = () => {
     const dialog: any = remote.dialog;
     dialog.showOpenDialog({
       defaultPath: '/Users/tedshaffer/Documents/Projects',
@@ -213,6 +219,12 @@ export default class App extends React.Component<any, object> {
         this.onSelectRepo(selectedPaths[0]);
       }
     });
+  }
+
+  handleSelectBranches() {
+    this.setState( {
+      selectBranchesDialogOpen: !this.state.selectBranchesDialogOpen,
+    })
   }
 
   mergeBranchCommits(branchName: string, branchCommits: BranchCommits) {
@@ -517,6 +529,17 @@ export default class App extends React.Component<any, object> {
     return commitGraphics;
   }
 
+  getBranchSelectorDialog() {
+    if (this.state.selectBranchesDialogOpen) {
+      return (
+        <BranchSelectorDialog/>
+      )
+    }
+    else {
+      return null;
+    }
+  }
+
   render() {
 
     const statusSummary: any = this.getStatusSummary();
@@ -525,6 +548,8 @@ export default class App extends React.Component<any, object> {
       return this.getListItem(localBranch, index);
     });
 
+    const branchSelectorDialog = this.getBranchSelectorDialog();
+
     const commits = this.getCommits();
     const commitsGraph = this.getCommitsGraph();
     const commitDetail = this.getSelectedCommitDetail();
@@ -532,8 +557,10 @@ export default class App extends React.Component<any, object> {
     return (
       <MuiThemeProvider>
         <div style={styles.rootDiv}>
+          {branchSelectorDialog}
           <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '20%'}}>
-            <RaisedButton label='Select Repo' onClick={this.handleBrowse} />
+            <RaisedButton label='Select Repo' onClick={this.handleSelectRepo} />
+            <RaisedButton label='Select Branches' onClick={this.handleSelectBranches} style={{marginLeft : '16px'}}/>
             {statusSummary}
             <List style={styles.listStyle}>
               <ListItem
