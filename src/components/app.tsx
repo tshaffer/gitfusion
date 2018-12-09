@@ -2,17 +2,15 @@ import {
   remote,
 } from 'electron';
 
-import { isNil } from 'lodash';
-
-import * as dateformat from 'dateformat';
-
 import * as React from 'react';
 import * as path from "path";
+import * as dateformat from 'dateformat';
+import { cloneDeep, isNil } from 'lodash';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import RaisedButton from 'material-ui/RaisedButton';
-import { List, ListItem } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
+
 import BranchSelectorDialog from './branchSelectorDialog';
 
 import {
@@ -35,6 +33,7 @@ import {
 // “width: 100px; float:left;”
 
 // https://v0.material-ui.com/#/
+// https://v0.material-ui.com/#/components/dialog
 // https://material-ui.com/api/list-item/
 // https://material-ui.com/customization/overrides/#overriding-with-classes
 // https://www.w3schools.com/css/tryit.asp?filename=trycss_position_absolute
@@ -57,11 +56,6 @@ const styles = {
   },
   buttonSpacing: {
     marginLeft: '16px',
-  },
-  commitList: {
-    display: 'block',
-    width: '100%',
-    height: '70%',
   },
   summaryType: {
     width: '128px'
@@ -96,10 +90,6 @@ const styles = {
     strokeWidth: '2',
     stroke: 'red'
   },
-  superListItem: {
-    margin: '0px',
-    padding: '0px'
-  },
   checkbox: {
     left: 2,
     marginBottom: 2,
@@ -107,16 +97,6 @@ const styles = {
     paddingBottom: 2,
     paddingTop: 0,
     top: 0,
-  },
-  listItem: {
-    marginBottom: 4,
-    marginTop: 6,
-    paddingBottom: 4,
-    paddingTop: 4,
-    paddingLeft: 26,
-  },
-  listStyle: {
-    padding: 0,
   },
   tightParagraph: {
     marginTop: '4px',
@@ -178,6 +158,7 @@ export default class App extends React.Component<any, object> {
     this.handleSelectCommit = this.handleSelectCommit.bind(this);
     this.getSelectedCommitDetail = this.getSelectedCommitDetail.bind(this);
     this.handleSelectBranches = this.handleSelectBranches.bind(this);
+    this.onBranchSelectorDialogSubmit = this.onBranchSelectorDialogSubmit.bind(this);
     this.onCloseBranchSelectorDialog = this.onCloseBranchSelectorDialog.bind(this);
   }
 
@@ -295,6 +276,12 @@ export default class App extends React.Component<any, object> {
     }
   }
 
+  onBranchSelectorDialogSubmit(branches: LocalBranch[]) {
+    this.setState( {
+      localBranches: cloneDeep(branches)
+    });
+  }
+
   onCloseBranchSelectorDialog() {
     this.setState( {
       selectBranchesDialogOpen: false
@@ -347,24 +334,6 @@ export default class App extends React.Component<any, object> {
           </tr>
         </tbody>
       </table>
-    );
-  }
-
-  getListItem(localBranch: LocalBranch, index: number) {
-    return (
-      <ListItem
-        key={index}
-        leftCheckbox={
-          <Checkbox
-            id={index.toString()}
-            checked={localBranch.display}
-            onCheck={this.handleSelectBranch}
-            style={styles.checkbox}
-          />
-        }
-        primaryText={localBranch.name}
-        style={styles.listItem}
-      />
     );
   }
 
@@ -502,7 +471,7 @@ export default class App extends React.Component<any, object> {
       yCoordinate += commitYDelta;
     });
 
-    console.log(commitDataByHash);
+    // console.log(commitDataByHash);
 
     let commitIndicators: any[] = [];
     let commitLines: any[] = [];
@@ -515,7 +484,7 @@ export default class App extends React.Component<any, object> {
         // draw lines from commit to parent(s)
         const commits: CommitOnBranches = commitsByHash[hash];
         const detailedCommitData: Commit = commits.commitData;
-        console.log(detailedCommitData.parentHashes);
+        // console.log(detailedCommitData.parentHashes);
         const parentHashes: string[] = detailedCommitData.parentHashes.split(' ');
         parentHashes.forEach((parentHash) => {
           const parentCommitData = commitDataByHash[parentHash];
@@ -542,6 +511,7 @@ export default class App extends React.Component<any, object> {
         <BranchSelectorDialog
           branches={this.state.localBranches}
           onCloseDialog={this.onCloseBranchSelectorDialog}
+          onUpdateSelectedBranches={this.onBranchSelectorDialogSubmit}
         />
       )
     }
@@ -554,9 +524,10 @@ export default class App extends React.Component<any, object> {
 
     const statusSummary: any = this.getStatusSummary();
 
-    const localBranches = this.state.localBranches.map((localBranch: any, index: number) => {
-      return this.getListItem(localBranch, index);
-    });
+    // console.log('render');
+    // this.state.localBranches.forEach( (localBranch: LocalBranch) => {
+    //   console.log(localBranch.name + ' : ' + localBranch.display);
+    // });
 
     const branchSelectorDialog = this.getBranchSelectorDialog();
 
@@ -572,15 +543,6 @@ export default class App extends React.Component<any, object> {
             <RaisedButton label='Select Repo' onClick={this.handleSelectRepo} />
             <RaisedButton label='Select Branches' onClick={this.handleSelectBranches} style={{marginLeft : '16px'}}/>
             {statusSummary}
-            <List style={styles.listStyle}>
-              <ListItem
-                primaryText="Select Local Branches"
-                initiallyOpen={false}
-                primaryTogglesNestedList={true}
-                nestedItems={localBranches}
-                style={styles.superListItem}>
-              </ListItem>
-            </List>
           </div>
           <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '50%'}}>
             <div style={styles.leftDiv}>

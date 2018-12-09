@@ -20,8 +20,7 @@ const styles = {
 export interface BranchSelectorFormProps {
   branches: LocalBranch[];
   onCloseDialog: () => void;
-  // stopPlayback: boolean;
-  // onUpdateStopPlayback: (id: string, stopPlayback: boolean) => (dispatch: Function) => void;
+  onUpdateSelectedBranches: (branches: LocalBranch[]) => void;
 }
 
 interface DialogState {
@@ -38,8 +37,6 @@ export default class BranchSelectorDialog extends React.Component<BranchSelector
     this.state = {
       branches: [],
     };
-
-    // this.handleSelectRepo = this.handleSelectRepo.bind(this);
   }
 
   componentDidMount() {
@@ -55,6 +52,11 @@ export default class BranchSelectorDialog extends React.Component<BranchSelector
   }
 
   handleClose = () => {
+    this.props.onCloseDialog();
+  };
+
+  handleSubmit = () => {
+    this.props.onUpdateSelectedBranches(this.state.branches);
     this.props.onCloseDialog();
   };
 
@@ -102,7 +104,7 @@ export default class BranchSelectorDialog extends React.Component<BranchSelector
         label="Submit"
         primary={true}
         keyboardFocused={true}
-        onClick={this.handleClose}
+        onClick={this.handleSubmit}
       />,
     ];
 
