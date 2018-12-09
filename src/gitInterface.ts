@@ -6,6 +6,8 @@ import {
   LocalBranch,
 } from './gitInterfaces';
 
+import * as dateformat from 'dateformat';
+
 export function shellInit() {
   shell.config.execPath = shell.which('node')
 }
@@ -66,17 +68,33 @@ export function getLocalBranches(): LocalBranch[] {
   return localBranches;
 }
 
+function addDays(date: Date, days: number): Date {
+  var result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
 export function getBranchCommits(): BranchCommits {
 
   // const commitFormat = '%H%n%P%n%cd%n%cn%n%B%n';
   // const commitFormat = 'commit=%HparentHashes=%PcommitDate=%cdcommiterName=%cnbody=%B';
   // const commitFormat = '{%n\"commits\": [%n{%n\"hash\": %H,%n\"parentHashes\": %P,%\"commitDate\": %cd, \"author\": %cn,%n\"message\": %B,%n}%n]%n}';
   // const commitFormat = '{%n\"hash\": \"%H\",%n\"parentHashes\": \"%P\",%n\"commitDate\": \"%cd\",%n\"author\": \"%cn\",%n\"message\": \"%B"\,%n},'
-  const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\",\"message\": \"%B"\}'
+  // const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\"\}'
+  const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\",\"subject\": \"%s\",\"message\": \"%B\"}'
 
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='%H%n%P%n%cd%n%cn%n%B%n'");
   // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='" + commitFormat + "'");
-  const logResults: string = gitLog("-3 --parents --date=iso-strict --format='" + commitFormat + "'");
+  const now: Date = new Date();
+  const earlierDate: Date = addDays(now, -14);
+  
+  // const sinceDate: string = dateformat(earlierDate, 'isoDate')
+  // TODO - for debugging purposes
+  const sinceDate = '2018-11-19';
+  // isoDate
+  // const logResults: string = gitLog("-3 --parents --date=iso-strict --format='" + commitFormat + "'");
+  const gitLogSpec: string = "--since='" + sinceDate + "' --parents --date=iso-strict --format='" + commitFormat + "'";
+  const logResults: string = gitLog(gitLogSpec);
 
   const newLine = '\n';
   const newLineRegex = new RegExp(newLine, 'g');
@@ -94,13 +112,14 @@ export function getBranchCommits(): BranchCommits {
 
   // TODO - is the following necessary to get them typed?
   branchCommits.commits = unTypedCommits.map( (unTypedCommit: any) => {
-    const { author, commitDate, hash, message, parentHashes } = unTypedCommit;
+    const { author, commitDate, hash, message, parentHashes, subject } = unTypedCommit;
     return {
       author,
       commitDate: new Date(commitDate),
       hash,
       message,
       parentHashes,
+      subject,
     }
   });
 

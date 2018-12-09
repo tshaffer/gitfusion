@@ -18,6 +18,7 @@ export interface Commit {
   hash: string;
   message: string;
   parentHashes: string;
+  subject: string;
 }
 
 export interface BranchCommits {

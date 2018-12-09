@@ -65,7 +65,7 @@ const styles = {
   summaryValue: {
     width: '900px'
   },
-  commitMessage: {
+  commitSubject: {
     width: '800px'
   },
   commitAuthor: {
@@ -79,7 +79,7 @@ const styles = {
     width: '100%',
     height: '30%',
     // backgroundColor: '#475',
-    // overflow: 'scroll'
+    // overflowY: 'scroll'
   },
   commitDetailItem: {
     marginTop: '4px',
@@ -306,32 +306,32 @@ export default class App extends React.Component<any, object> {
     });
   }
 
- getStatusSummary() {
+  getStatusSummary() {
 
-  const currentBranchName: string = 
-    isNil(this.state.currentBranch) ? '' : this.state.currentBranch;
+    const currentBranchName: string =
+      isNil(this.state.currentBranch) ? '' : this.state.currentBranch;
 
-  return (
-    <table>
-      <tbody>
-        <tr style={styles.tightParagraph}>
-          <td style={styles.summaryType}>Repo:</td>
-          <td style={styles.summaryValue}>{this.state.repoName}</td>
-        </tr>
-        <tr style={styles.tightParagraph}>
-          <td style={styles.summaryType}>Location:</td>
-          <td style={styles.summaryValue}>{this.state.repoPath}</td>
-        </tr>
-        <tr style={styles.tightParagraph}>
-          <td style={styles.summaryType}>Current branch:</td>
-          <td style={styles.summaryValue}>{currentBranchName}</td>
-        </tr>
-      </tbody>
-    </table>
-  );
-}
+    return (
+      <table>
+        <tbody>
+          <tr style={styles.tightParagraph}>
+            <td style={styles.summaryType}>Repo:</td>
+            <td style={styles.summaryValue}>{this.state.repoName}</td>
+          </tr>
+          <tr style={styles.tightParagraph}>
+            <td style={styles.summaryType}>Location:</td>
+            <td style={styles.summaryValue}>{this.state.repoPath}</td>
+          </tr>
+          <tr style={styles.tightParagraph}>
+            <td style={styles.summaryType}>Current branch:</td>
+            <td style={styles.summaryValue}>{currentBranchName}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  }
 
-getListItem(localBranch: LocalBranch, index: number) {
+  getListItem(localBranch: LocalBranch, index: number) {
     return (
       <ListItem
         key={index}
@@ -353,7 +353,7 @@ getListItem(localBranch: LocalBranch, index: number) {
     return (
       <tr
         onClick={this.handleSelectCommit.bind(this, commit)}>
-        <td style={styles.commitMessage}>{commit.commitData.message}</td>
+        <td style={styles.commitSubject}>{commit.commitData.subject}</td>
         <td style={styles.commitAuthor}>{commit.commitData.author}</td>
         <td style={styles.commitDate}>{dateformat(commit.commitData.commitDate, 'shortDate')}</td>
       </tr>
@@ -428,7 +428,7 @@ getListItem(localBranch: LocalBranch, index: number) {
   }
 
   getCommitIndicator(x: number, y: number, commitIndicatorStyle: any) {
-    const circleStyle: any = Object.assign( {}, styles.svgCircle, commitIndicatorStyle);
+    const circleStyle: any = Object.assign({}, styles.svgCircle, commitIndicatorStyle);
     return (
       <circle cx={x} cy={y} r="5px" style={circleStyle} />
     );
@@ -441,7 +441,7 @@ getListItem(localBranch: LocalBranch, index: number) {
     const branchXDelta = 24;
 
     const commitStartingY = 364;
-    let yCoordinate = commitStartingY; 
+    let yCoordinate = commitStartingY;
     const commitYDelta = 23;
 
     if (isNil(this.state.currentBranch)) {
@@ -459,7 +459,7 @@ getListItem(localBranch: LocalBranch, index: number) {
     let xCoordinate: number;
     const commitDataByHash: any = {};
 
-    this.state.sortedCommits.map( (commit: CommitOnBranches, index: number) => {
+    this.state.sortedCommits.map((commit: CommitOnBranches, index: number) => {
       const branchNames = commit.branchNames;
       const i = branchNames.indexOf(currentBranchName);
       if (i >= 0 && branchNames[i] === currentBranchName) {
@@ -487,7 +487,7 @@ getListItem(localBranch: LocalBranch, index: number) {
 
     let commitIndicators: any[] = [];
     let commitLines: any[] = [];
-    for (const hash in commitDataByHash) { 
+    for (const hash in commitDataByHash) {
       if (commitDataByHash.hasOwnProperty(hash)) {
         const commitData: any = commitDataByHash[hash];
         const { xCoordinate, yCoordinate, commitIndicatorStyle } = commitData;
@@ -498,13 +498,13 @@ getListItem(localBranch: LocalBranch, index: number) {
         const detailedCommitData: Commit = commits.commitData;
         console.log(detailedCommitData.parentHashes);
         const parentHashes: string[] = detailedCommitData.parentHashes.split(' ');
-        parentHashes.forEach( (parentHash) => {
+        parentHashes.forEach((parentHash) => {
           const parentCommitData = commitDataByHash[parentHash];
           if (!isNil(parentCommitData)) {
             commitLines.push(this.getCommitLine(
-              xCoordinate, 
+              xCoordinate,
               yCoordinate,
-              parentCommitData.xCoordinate, 
+              parentCommitData.xCoordinate,
               parentCommitData.yCoordinate,
             ));
           }
@@ -513,7 +513,7 @@ getListItem(localBranch: LocalBranch, index: number) {
     }
 
     const commitGraphics: any = commitLines.concat(commitIndicators);
-    
+
     return commitGraphics;
   }
 
@@ -538,7 +538,7 @@ getListItem(localBranch: LocalBranch, index: number) {
             </svg>
           </div>
           <div style={styles.rightDiv}>
-            <div style={styles.commitList}>
+            <div style={{overflowY : 'scroll', display: 'block', width: '100%', height: '70%'}}>
               <RaisedButton label='Select Repo' onClick={this.handleBrowse} />
               <List style={styles.listStyle}>
                 <ListItem
