@@ -44,7 +44,7 @@ export function getLocalBranches(): LocalBranch[] {
   const localBranches: LocalBranch[] = [];
 
   const branchResultEntities: string[] = branchResults.split('\n');
-  branchResultEntities.forEach( (branchResultEntity: string) => {
+  branchResultEntities.forEach((branchResultEntity: string) => {
     let localBranch: LocalBranch;
     if (branchResultEntity.startsWith('*')) {
       localBranch = {
@@ -76,23 +76,15 @@ function addDays(date: Date, days: number): Date {
 
 export function getBranchCommits(): BranchCommits {
 
-  // const commitFormat = '%H%n%P%n%cd%n%cn%n%B%n';
-  // const commitFormat = 'commit=%HparentHashes=%PcommitDate=%cdcommiterName=%cnbody=%B';
-  // const commitFormat = '{%n\"commits\": [%n{%n\"hash\": %H,%n\"parentHashes\": %P,%\"commitDate\": %cd, \"author\": %cn,%n\"message\": %B,%n}%n]%n}';
-  // const commitFormat = '{%n\"hash\": \"%H\",%n\"parentHashes\": \"%P\",%n\"commitDate\": \"%cd\",%n\"author\": \"%cn\",%n\"message\": \"%B"\,%n},'
-  // const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\"\}'
-  const commitFormat = '{\"hash\": \"%H\",\"parentHashes\": \"%P\",\"commitDate\": \"%cd\",\"author\": \"%cn\",\"subject\": \"%s\",\"message\": \"%B\"}'
+  const commitFormat = 'hash&&%H||parentHashes&&%P||commitDate&&%cd||author&&%cn||subject&&%s||message&&%B&&&&';
 
-  // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='%H%n%P%n%cd%n%cn%n%B%n'");
-  // const logResults: string = gitLog("--since='2018-11-19' --parents --date=iso-strict --format='" + commitFormat + "'");
   const now: Date = new Date();
-  const earlierDate: Date = addDays(now, -14);
-  
-  // const sinceDate: string = dateformat(earlierDate, 'isoDate')
+  const beginningDate: Date = addDays(now, -22);
+
+  const sinceDate: string = dateformat(beginningDate, 'isoDate')
   // TODO - for debugging purposes
-  const sinceDate = '2018-11-19';
-  // isoDate
-  // const logResults: string = gitLog("-3 --parents --date=iso-strict --format='" + commitFormat + "'");
+  // const sinceDate = '2018-11-18';
+
   const gitLogSpec: string = "--since='" + sinceDate + "' --parents --date=iso-strict --format='" + commitFormat + "'";
   const logResults: string = gitLog(gitLogSpec);
 
@@ -100,27 +92,57 @@ export function getBranchCommits(): BranchCommits {
   const newLineRegex = new RegExp(newLine, 'g');
   const strippedResults = logResults.replace(newLineRegex, '');
 
-  const adjacentObjects = '}{';
-  const adjacentElementRegex = new RegExp(adjacentObjects, 'g');
-  const formattedResults = strippedResults.replace(adjacentElementRegex, '},{');
+  const commitLines = strippedResults.split('&&&&').slice(0, -1);
 
-  const unTypedCommits: any = JSON.parse('[' + formattedResults + ']');
+  const commitLinesByProperty = commitLines.map((commitLine: string) => {
+    return commitLine.split('||');
+  })
+  console.log(commitLinesByProperty);
 
   const branchCommits: BranchCommits = {
     commits: []
   };
 
-  // TODO - is the following necessary to get them typed?
-  branchCommits.commits = unTypedCommits.map( (unTypedCommit: any) => {
-    const { author, commitDate, hash, message, parentHashes, subject } = unTypedCommit;
+  branchCommits.commits = commitLinesByProperty.map((commitSpec: any[]) => {
+    let author: string;
+    let commitDate: Date;
+    let hash: string;
+    let message: string;
+    let parentHashes: string;
+    let subject: string;
+
+    commitSpec.forEach((commitProperty) => {
+      const commitPropertyComponents = commitProperty.split('&&');
+      switch (commitPropertyComponents[0]) {
+        case 'hash':
+          hash = commitPropertyComponents[1];
+          break;
+        case 'commitDate':
+          commitDate = new Date(commitPropertyComponents[1])
+          break;
+        case 'author':
+          author = commitPropertyComponents[1];
+          break;
+        case 'message':
+          message = commitPropertyComponents[1];
+          break;
+        case 'parentHashes':
+          parentHashes = commitPropertyComponents[1];
+          break;
+        case 'subject':
+          subject = commitPropertyComponents[1];
+          break;
+      }
+    });
+
     return {
       author,
-      commitDate: new Date(commitDate),
+      commitDate,
       hash,
       message,
       parentHashes,
-      subject,
-    }
+      subject
+    };
   });
 
   console.log(branchCommits);
